@@ -4,7 +4,15 @@ import { Phone, AlertCircle, Heart, Pill, ShieldAlert, Droplet } from 'lucide-re
 
 export default function EmergencyCardView({ profile }) {
   // Use mock data if profile is not provided
-  const patient = profile || {
+  const patient = profile ? {
+    name: profile.name,
+    age: profile.age || 'N/A',
+    bloodGroup: profile.blood_group || 'N/A',
+    allergies: profile.allergies || [],
+    chronicDiseases: profile.chronic_diseases || [],
+    medications: profile.current_medications || [],
+    contacts: profile.emergency_contacts || []
+  } : {
     name: 'Priya Sharma',
     age: 34,
     bloodGroup: 'O+',
@@ -42,7 +50,7 @@ export default function EmergencyCardView({ profile }) {
         {/* Basic Info & Blood Group */}
         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
           <div>
-            <h3 className="text-2xl font-extrabold text-slate-800">{patient.name}</h3>
+            <h3 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">{patient.name}</h3>
             <p className="text-slate-500 font-semibold text-sm mt-0.5">{patient.age} Years Old • Verified Patient</p>
           </div>
           <div className="text-center">
@@ -121,11 +129,12 @@ export default function EmergencyCardView({ profile }) {
             {patient.contacts.map(c => (
               <a 
                 key={c.name} 
-                href={`tel:${c.phone}`}
+                href={profile ? `tel:${c.phone}` : '#'}
+                onClick={(e) => { if(!profile) { e.preventDefault(); alert("Call feature disabled in demo mode."); } }}
                 className="flex items-center justify-between p-4 bg-white border border-slate-200/60 rounded-xl hover:border-emerald-400 hover:shadow-md transition-all duration-200 group"
               >
                 <div>
-                  <div className="font-bold text-slate-800 text-sm">{c.name}</div>
+                  <div className="font-bold text-slate-800 dark:text-slate-900 text-sm">{c.name}</div>
                   <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-0.5">{c.relationship}</div>
                 </div>
                 <div className="bg-emerald-50 p-2.5 rounded-lg text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-250">

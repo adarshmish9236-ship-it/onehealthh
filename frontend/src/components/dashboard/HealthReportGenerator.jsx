@@ -13,14 +13,6 @@ import { cn } from '../../utils/formatters'
 import { aiService } from '../../services/aiService'
 import { useRecordsStore } from '../../store/recordsStore'
 
-const SOURCES = [
-  { id: 'records',    label: 'Medical Records',   icon: <FileText size={16} />,      desc: '12 records found' },
-  { id: 'symptoms',   label: 'Symptom History',   icon: <Activity size={16} />,      desc: '3 analyses' },
-  { id: 'reports',    label: 'Lab Reports',        icon: <TrendingUp size={16} />,    desc: '5 reports' },
-  { id: 'medications',label: 'Medications',        icon: <Pill size={16} />,          desc: '2 active' },
-  { id: 'risk',       label: 'Risk Analysis',      icon: <AlertTriangle size={16} />, desc: 'Medium risk profile' },
-]
-
 const GENERATION_STEPS = [
   'Collecting medical records...',
   'Analyzing health timeline...',
@@ -79,6 +71,18 @@ export default function HealthReportGenerator() {
   const profile = useUserStore(s => s.profile)
   const records = useRecordsStore(s => s.records)
   const toast = useToast()
+
+  const medicalRecordsCount = records.length;
+  const labReportsCount = records.filter(r => r.type === 'report').length;
+  const activeMedsCount = profile?.current_medications?.length || 0;
+
+  const SOURCES = [
+    { id: 'records',    label: 'Medical Records',   icon: <FileText size={16} />,      desc: `${medicalRecordsCount} records found` },
+    { id: 'symptoms',   label: 'Symptom History',   icon: <Activity size={16} />,      desc: 'Symptom analyses' },
+    { id: 'reports',    label: 'Lab Reports',        icon: <TrendingUp size={16} />,    desc: `${labReportsCount} reports` },
+    { id: 'medications',label: 'Medications',        icon: <Pill size={16} />,          desc: `${activeMedsCount} active` },
+    { id: 'risk',       label: 'Risk Analysis',      icon: <AlertTriangle size={16} />, desc: 'Risk profile' },
+  ]
 
   const toggleSource = (id) => {
     setSelectedSources(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id])

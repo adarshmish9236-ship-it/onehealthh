@@ -3,11 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 import EmergencyCardView from '../components/emergency/EmergencyCardView'
 import { Button } from '../components/ui/Button'
 import { Share2, Mic, AlertTriangle, ShieldCheck, HeartPulse, ChevronRight } from 'lucide-react'
+import { useUserStore } from '../store/userStore'
 
 export default function Emergency() {
   const [isGuidanceMode, setIsGuidanceMode] = useState(false)
   const [guidanceResult, setGuidanceResult] = useState(null)
   const [symptomInput, setSymptomInput] = useState('')
+  const profile = useUserStore(s => s.profile)
 
   const handleGetGuidance = () => {
     if (!symptomInput.trim()) return
@@ -44,7 +46,7 @@ export default function Emergency() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <EmergencyCardView />
+          <EmergencyCardView profile={profile} />
         </motion.div>
 
         {/* Action Controls */}
