@@ -212,7 +212,8 @@ export function Login() {
 }
 
 export function Register() {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '' })
+  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', passportId: '' })
+  const [generatePassport, setGeneratePassport] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
@@ -229,6 +230,7 @@ export function Register() {
     try {
       const fbUser = await authService.registerUser(form.email, form.password, form.name, 'patient', {
         phone: form.phone,
+        passportId: generatePassport ? undefined : form.passportId,
         profile: {
           dob: null,
           gender: null,
@@ -272,6 +274,38 @@ export function Register() {
           leftIcon={<Lock size={16} />} value={form.password}
           onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
           hint="At least 8 characters" />
+
+        <div className="space-y-3 p-4 rounded-xl border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.02)]">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input 
+              type="checkbox" 
+              checked={generatePassport}
+              onChange={e => setGeneratePassport(e.target.checked)}
+              className="mt-1" 
+              style={{ accentColor: '#6366f1' }} 
+            />
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-blue-100/90">Generate new Patient Passport</span>
+              <span className="text-xs text-blue-200/60 mt-1 leading-relaxed">
+                Your Passport ID securely stores all your data. Uncheck to enter an existing ID and import your medical records.
+              </span>
+            </div>
+          </label>
+          
+          {!generatePassport && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="pt-2 border-t border-[rgba(255,255,255,0.1)]">
+              <AuthInput 
+                id="reg-passport" 
+                label="Existing Passport ID" 
+                placeholder="e.g. HP-12345"
+                leftIcon={<HeartPulse size={16} />} 
+                value={form.passportId}
+                onChange={e => setForm(f => ({ ...f, passportId: e.target.value }))} 
+                hint="We will link this Passport ID to import your previous records."
+              />
+            </motion.div>
+          )}
+        </div>
 
         <label className="flex items-start gap-3 cursor-pointer">
           <input type="checkbox" required className="mt-1" style={{ accentColor: '#6366f1' }} />

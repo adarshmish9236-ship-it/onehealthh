@@ -134,6 +134,7 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/otp" element={<OTP />} />
           <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/emergency/demo" element={<Emergency />} />
 
           {/* Doctor Public Routes */}
           <Route path="/doctor/login" element={<DoctorLogin />} />

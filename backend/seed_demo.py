@@ -9,10 +9,12 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from services.firebase_service import db
 
-def get_or_create_user(email, password, display_name):
+def get_or_create_user(email, password, display_name, role):
     try:
         user = auth.get_user_by_email(email)
         print(f"Found existing user {email} with UID: {user.uid}")
+        auth.set_custom_user_claims(user.uid, {'role': role})
+        print(f"Set custom claim 'role': '{role}' for {email}")
         return user.uid
     except auth.UserNotFoundError:
         user = auth.create_user(
@@ -21,13 +23,17 @@ def get_or_create_user(email, password, display_name):
             display_name=display_name
         )
         print(f"Created user {email} with UID: {user.uid}")
+        auth.set_custom_user_claims(user.uid, {'role': role})
+        print(f"Set custom claim 'role': '{role}' for {email}")
         return user.uid
 
 def seed_data():
-    patient_uid = get_or_create_user('patient@onehealth.com', 'password123', 'Demo Patient')
-    doctor_uid = get_or_create_user('doctor@onehealth.com', 'password123', 'Dr. Demo')
+    patient_uid = get_or_create_user('patient@onehealth.com', 'password123', 'Demo Patient', 'patient')
+    patient2_uid = get_or_create_user('john.doe@example.com', 'password123', 'John Doe', 'patient')
+    patient3_uid = get_or_create_user('jane.miller@example.com', 'password123', 'Jane Miller', 'patient')
+    doctor_uid = get_or_create_user('doctor@onehealth.com', 'password123', 'Dr. Demo', 'doctor')
 
-    print("Seeding patient profile...")
+    print("Seeding patient profiles...")
     user_ref = db.collection('users').document(patient_uid)
     user_ref.set({
         "uid": patient_uid,
@@ -41,6 +47,38 @@ def seed_data():
             "gender": "Male",
             "dob": "1990-01-01",
             "chronic_conditions": ["Healthy"]
+        }
+    }, merge=True)
+
+    user2_ref = db.collection('users').document(patient2_uid)
+    user2_ref.set({
+        "uid": patient2_uid,
+        "name": "John Doe",
+        "email": "john.doe@example.com",
+        "role": "patient",
+        "profile": {
+            "passport_id": "HP-JD002",
+            "health_score": 72,
+            "blood_group": "A-",
+            "gender": "Male",
+            "dob": "1985-05-12",
+            "chronic_conditions": ["Hypertension"]
+        }
+    }, merge=True)
+
+    user3_ref = db.collection('users').document(patient3_uid)
+    user3_ref.set({
+        "uid": patient3_uid,
+        "name": "Jane Miller",
+        "email": "jane.miller@example.com",
+        "role": "patient",
+        "profile": {
+            "passport_id": "HP-JM003",
+            "health_score": 91,
+            "blood_group": "B+",
+            "gender": "Female",
+            "dob": "1993-09-24",
+            "chronic_conditions": ["Asthma"]
         }
     }, merge=True)
 
@@ -58,54 +96,395 @@ def seed_data():
     }, merge=True)
 
     print("Cleaning up old patient records/meds...")
-    for doc in db.collection('records').where('patient_uid', '==', patient_uid).stream():
-        doc.reference.delete()
-    for doc in db.collection('medications').where('patient_uid', '==', patient_uid).stream():
+    for p_uid in [patient_uid, patient2_uid, patient3_uid]:
+        for doc in db.collection('records').where('patient_uid', '==', p_uid).stream():
+            doc.reference.delete()
+        for doc in db.collection('medications').where('patient_uid', '==', p_uid).stream():
+            doc.reference.delete()
+
+    print("Cleaning up old consents...")
+    for doc in db.collection('doctor_consents').where('doctor_uid', '==', doctor_uid).stream():
         doc.reference.delete()
 
+    print("Seeding doctor consents...")
+    for p_uid in [patient_uid, patient2_uid, patient3_uid]:
+        c = db.collection('doctor_consents').document()
+        c.set({
+            "id": c.id,
+            "doctor_uid": doctor_uid,
+            "patient_uid": p_uid,
+            "status": "active",
+            "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
+        })
+
+
     print("Seeding records...")
+    # Record 1: CBC
     r1 = db.collection('records').document()
     r1.set({
         "id": r1.id,
         "patient_uid": patient_uid,
-        "title": "Complete Blood Count",
+        "uploaded_by": doctor_uid,
         "type": "report",
-        "date": "2026-05-15",
+        "date": "2026-05-15T10:00:00Z",
+        "title": "Complete Blood Count",
         "metadata": {
             "hospital": "City General Lab",
-            "doctor_name": "Dr. Sarah Smith"
+            "doctor_name": "Dr. Sarah Smith",
+            "notes": "Annual physical checkup lab results."
         },
         "ai_analysis": {
-            "summary": "Hemoglobin slightly low. WBC within normal limits. Platelets normal.",
+            "summary": "Mild anemia indicated by slightly low hemoglobin. Other cell lines (WBC, Platelets) are within normal limits.",
             "extracted_values": [
-                {"parameter": "Hemoglobin", "value": "11.2", "unit": "g/dL", "status": "low"},
-                {"parameter": "WBC", "value": "7.5", "unit": "x10^9/L", "status": "normal"}
-            ]
+                {"parameter": "Hemoglobin", "value": "11.2", "unit": "g/dL", "reference_range": "12.0 - 16.0", "status": "low"},
+                {"parameter": "WBC", "value": "7.5", "unit": "x10^9/L", "reference_range": "4.0 - 11.0", "status": "normal"},
+                {"parameter": "Platelets", "value": "250", "unit": "x10^9/L", "reference_range": "150 - 450", "status": "normal"}
+            ],
+            "suggested_actions": [
+                "Increase dietary iron intake (spinach, red meat, legumes)",
+                "Consider a gentle iron supplement after consulting your physician",
+                "Recheck blood count in 3 months"
+            ],
+            "processed_at": "2026-05-15T12:00:00Z"
         },
-        "created_at": firestore.SERVER_TIMESTAMP
+        "created_at": firestore.SERVER_TIMESTAMP,
+        "updated_at": firestore.SERVER_TIMESTAMP
     })
 
+    # Record 2: Lipid Profile
     r2 = db.collection('records').document()
     r2.set({
         "id": r2.id,
         "patient_uid": patient_uid,
-        "title": "Chest X-Ray",
+        "uploaded_by": patient_uid,
         "type": "report",
-        "date": "2026-02-28",
+        "date": "2026-05-02T09:30:00Z",
+        "title": "Lipid Panel",
         "metadata": {
-            "hospital": "Metro Imaging Center",
-            "doctor_name": "Dr. Emily Chen"
+            "hospital": "Metro Diagnostics",
+            "doctor_name": "Dr. Sarah Smith",
+            "notes": "Fasting lipid profile."
         },
         "ai_analysis": {
-            "summary": "No acute cardiopulmonary abnormalities. Clear lung fields. Heart size normal.",
+            "summary": "Elevated LDL (bad cholesterol) and borderline high triglycerides. Total cholesterol is above optimal level.",
             "extracted_values": [
-                {"parameter": "Heart Size", "value": "Normal", "unit": "", "status": "normal"}
-            ]
+                {"parameter": "Total Cholesterol", "value": "245", "unit": "mg/dL", "reference_range": "100 - 200", "status": "high"},
+                {"parameter": "LDL Cholesterol", "value": "160", "unit": "mg/dL", "reference_range": "0 - 100", "status": "high"},
+                {"parameter": "HDL Cholesterol", "value": "45", "unit": "mg/dL", "reference_range": "40 - 60", "status": "normal"},
+                {"parameter": "Triglycerides", "value": "180", "unit": "mg/dL", "reference_range": "30 - 150", "status": "high"}
+            ],
+            "suggested_actions": [
+                "Switch to a heart-healthy diet low in saturated fats",
+                "Aim for at least 30 minutes of moderate aerobic exercise 5 days a week",
+                "Consider taking Omega-3 fish oil supplements"
+            ],
+            "processed_at": "2026-05-02T11:00:00Z"
         },
-        "created_at": firestore.SERVER_TIMESTAMP
+        "created_at": firestore.SERVER_TIMESTAMP,
+        "updated_at": firestore.SERVER_TIMESTAMP
     })
 
+    # Record 3: Thyroid Panel
+    r3 = db.collection('records').document()
+    r3.set({
+        "id": r3.id,
+        "patient_uid": patient_uid,
+        "uploaded_by": doctor_uid,
+        "type": "report",
+        "date": "2026-04-10T08:15:00Z",
+        "title": "Thyroid Function Test",
+        "metadata": {
+            "hospital": "City General Lab",
+            "doctor_name": "Dr. Emily Chen",
+            "notes": "Follow-up for reported fatigue."
+        },
+        "ai_analysis": {
+            "summary": "Subclinical hypothyroidism suggested by slightly elevated TSH. Free T4 is within normal range.",
+            "extracted_values": [
+                {"parameter": "TSH", "value": "4.8", "unit": "mIU/L", "reference_range": "0.4 - 4.0", "status": "high"},
+                {"parameter": "Free T4", "value": "1.1", "unit": "ng/dL", "reference_range": "0.8 - 1.8", "status": "normal"}
+            ],
+            "suggested_actions": [
+                "Monitor for clinical symptoms of hypothyroidism (fatigue, weight gain, dry skin)",
+                "Repeat TSH and Free T4 in 3 months to evaluate trend"
+            ],
+            "processed_at": "2026-04-10T10:30:00Z"
+        },
+        "created_at": firestore.SERVER_TIMESTAMP,
+        "updated_at": firestore.SERVER_TIMESTAMP
+    })
+
+    # Record 4: Blood Glucose & HbA1c
+    r4 = db.collection('records').document()
+    r4.set({
+        "id": r4.id,
+        "patient_uid": patient_uid,
+        "uploaded_by": patient_uid,
+        "type": "report",
+        "date": "2026-03-15T07:45:00Z",
+        "title": "Glucose and HbA1c Report",
+        "metadata": {
+            "hospital": "Metro Diagnostics",
+            "doctor_name": "Dr. Sarah Smith",
+            "notes": "Routine diabetic screening."
+        },
+        "ai_analysis": {
+            "summary": "Borderline prediabetes. HbA1c and fasting blood glucose are slightly above the normal thresholds.",
+            "extracted_values": [
+                {"parameter": "HbA1c", "value": "5.8", "unit": "%", "reference_range": "4.0 - 5.6", "status": "high"},
+                {"parameter": "Fasting Glucose", "value": "105", "unit": "mg/dL", "reference_range": "70 - 99", "status": "high"}
+            ],
+            "suggested_actions": [
+                "Reduce intake of refined carbohydrates, sugars, and sweetened beverages",
+                "Increase daily physical activity and monitor blood sugar levels",
+                "Repeat screening in 6 months"
+            ],
+            "processed_at": "2026-03-15T09:00:00Z"
+        },
+        "created_at": firestore.SERVER_TIMESTAMP,
+        "updated_at": firestore.SERVER_TIMESTAMP
+    })
+
+    # Record 5: Prescription
+    r5 = db.collection('records').document()
+    r5.set({
+        "id": r5.id,
+        "patient_uid": patient_uid,
+        "uploaded_by": doctor_uid,
+        "type": "prescription",
+        "date": "2026-05-18T14:00:00Z",
+        "title": "Hypertension Prescription",
+        "metadata": {
+            "hospital": "City General Hospital",
+            "doctor_name": "Dr. Sarah Smith",
+            "notes": "Prescribed Amlodipine 5mg to manage mild hypertension. Take daily in the morning."
+        },
+        "ai_analysis": {
+            "summary": "Active prescription for daily Amlodipine 5mg for high blood pressure management.",
+            "extracted_values": [
+                {"parameter": "Amlodipine Dosage", "value": "5", "unit": "mg", "reference_range": "5 - 10", "status": "normal"}
+            ],
+            "suggested_actions": [
+                "Take 1 tablet daily in the morning with water",
+                "Monitor home blood pressure weekly and record readings",
+                "Report any ankle swelling or dizziness to your doctor"
+            ],
+            "processed_at": "2026-05-18T14:15:00Z"
+        },
+        "created_at": firestore.SERVER_TIMESTAMP,
+        "updated_at": firestore.SERVER_TIMESTAMP
+    })
+
+    # Record 6: Vaccination Record
+    r6 = db.collection('records').document()
+    r6.set({
+        "id": r6.id,
+        "patient_uid": patient_uid,
+        "uploaded_by": patient_uid,
+        "type": "vaccination",
+        "date": "2026-01-20T11:00:00Z",
+        "title": "COVID-19 Booster Vaccination",
+        "metadata": {
+            "hospital": "Community Vaccination Center",
+            "doctor_name": "Nurse Practitioner J. Doe",
+            "notes": "Pfizer-BioNTech COVID-19 Vaccine Booster Dose. Batch #PZ12345."
+        },
+        "ai_analysis": {
+            "summary": "Completed booster dose immunization against COVID-19.",
+            "extracted_values": [
+                {"parameter": "Dose Number", "value": "3", "unit": "", "reference_range": "1 - 3", "status": "normal"}
+            ],
+            "suggested_actions": [
+                "Keep immunization card updated",
+                "Monitor for common local side effects (soreness, low fever) for 24-48 hours"
+            ],
+            "processed_at": "2026-01-20T11:30:00Z"
+        },
+        "created_at": firestore.SERVER_TIMESTAMP,
+        "updated_at": firestore.SERVER_TIMESTAMP
+    })
+
+    # ==================== SEED DATA FOR PATIENT 2: JOHN DOE ====================
+    print("Seeding records for John Doe...")
+    r2_1 = db.collection('records').document()
+    r2_1.set({
+        "id": r2_1.id,
+        "patient_uid": patient2_uid,
+        "uploaded_by": doctor_uid,
+        "type": "report",
+        "date": "2026-05-20T09:00:00Z",
+        "title": "Renal Function Panel",
+        "metadata": {
+            "hospital": "City General Lab",
+            "doctor_name": "Dr. Demo",
+            "notes": "Routine renal checkup."
+        },
+        "ai_analysis": {
+            "summary": "Kidney function is stable. EGFR and BUN are well within normal limits, though creatinine is near the upper limit.",
+            "extracted_values": [
+                {"parameter": "eGFR", "value": "95", "unit": "mL/min/1.73m2", "reference_range": ">90", "status": "normal"},
+                {"parameter": "BUN", "value": "16", "unit": "mg/dL", "reference_range": "7 - 20", "status": "normal"},
+                {"parameter": "Creatinine", "value": "1.2", "unit": "mg/dL", "reference_range": "0.6 - 1.3", "status": "normal"}
+            ],
+            "suggested_actions": [
+                "Maintain adequate hydration throughout the day",
+                "Limit excessive intake of protein supplements"
+            ],
+            "processed_at": "2026-05-20T11:00:00Z"
+        },
+        "created_at": firestore.SERVER_TIMESTAMP,
+        "updated_at": firestore.SERVER_TIMESTAMP
+    })
+
+    r2_2 = db.collection('records').document()
+    r2_2.set({
+        "id": r2_2.id,
+        "patient_uid": patient2_uid,
+        "uploaded_by": patient2_uid,
+        "type": "report",
+        "date": "2026-04-18T08:30:00Z",
+        "title": "Lipid Profile",
+        "metadata": {
+            "hospital": "Metro Diagnostics",
+            "doctor_name": "Dr. Demo",
+            "notes": "Follow-up for cardiovascular assessment."
+        },
+        "ai_analysis": {
+            "summary": "Total Cholesterol and LDL are slightly high. Patient has mild hyperlipidemia.",
+            "extracted_values": [
+                {"parameter": "Total Cholesterol", "value": "210", "unit": "mg/dL", "reference_range": "<200", "status": "high"},
+                {"parameter": "LDL", "value": "135", "unit": "mg/dL", "reference_range": "<100", "status": "high"},
+                {"parameter": "HDL", "value": "42", "unit": "mg/dL", "reference_range": ">40", "status": "normal"}
+            ],
+            "suggested_actions": [
+                "Reduce dietary intake of saturated fats",
+                "Increase daily exercise and follow up in 6 months"
+            ],
+            "processed_at": "2026-04-18T10:00:00Z"
+        },
+        "created_at": firestore.SERVER_TIMESTAMP,
+        "updated_at": firestore.SERVER_TIMESTAMP
+    })
+
+    r2_3 = db.collection('records').document()
+    r2_3.set({
+        "id": r2_3.id,
+        "patient_uid": patient2_uid,
+        "uploaded_by": doctor_uid,
+        "type": "prescription",
+        "date": "2026-05-20T10:15:00Z",
+        "title": "Hypertension Medication Prescription",
+        "metadata": {
+            "hospital": "City General Hospital",
+            "doctor_name": "Dr. Demo",
+            "notes": "Take 1 tablet daily for blood pressure control."
+        },
+        "ai_analysis": {
+            "summary": "Prescribed Lisinopril 10mg once daily.",
+            "extracted_values": [
+                {"parameter": "Lisinopril", "value": "10", "unit": "mg", "reference_range": "5 - 40", "status": "normal"}
+            ],
+            "suggested_actions": [
+                "Take at the same time every morning with water",
+                "Monitor for side effects like a dry cough"
+            ],
+            "processed_at": "2026-05-20T10:20:00Z"
+        },
+        "created_at": firestore.SERVER_TIMESTAMP,
+        "updated_at": firestore.SERVER_TIMESTAMP
+    })
+
+    # ==================== SEED DATA FOR PATIENT 3: JANE MILLER ====================
+    print("Seeding records for Jane Miller...")
+    r3_1 = db.collection('records').document()
+    r3_1.set({
+        "id": r3_1.id,
+        "patient_uid": patient3_uid,
+        "uploaded_by": doctor_uid,
+        "type": "report",
+        "date": "2026-05-22T11:00:00Z",
+        "title": "Spirometry / Lung Function Test",
+        "metadata": {
+            "hospital": "Pulmonary Health Clinic",
+            "doctor_name": "Dr. Emily Chen",
+            "notes": "Asthma evaluation."
+        },
+        "ai_analysis": {
+            "summary": "Mild obstructive defect observed, consistent with well-controlled asthma. FEV1/FVC ratio is slightly low.",
+            "extracted_values": [
+                {"parameter": "FEV1", "value": "2.8", "unit": "L", "reference_range": "2.5 - 3.5", "status": "normal"},
+                {"parameter": "FEV1/FVC Ratio", "value": "73", "unit": "%", "reference_range": "75 - 85", "status": "low"}
+            ],
+            "suggested_actions": [
+                "Continue using inhaler as prescribed",
+                "Avoid dust and smoke triggers"
+            ],
+            "processed_at": "2026-05-22T12:30:00Z"
+        },
+        "created_at": firestore.SERVER_TIMESTAMP,
+        "updated_at": firestore.SERVER_TIMESTAMP
+    })
+
+    r3_2 = db.collection('records').document()
+    r3_2.set({
+        "id": r3_2.id,
+        "patient_uid": patient3_uid,
+        "uploaded_by": patient3_uid,
+        "type": "report",
+        "date": "2026-03-12T14:00:00Z",
+        "title": "Allergy IgE Panel",
+        "metadata": {
+            "hospital": "Metro Diagnostics",
+            "doctor_name": "Dr. Sarah Smith",
+            "notes": "Inhalant allergen screening."
+        },
+        "ai_analysis": {
+            "summary": "Positive for severe dust mite allergy and moderate grass pollen allergy.",
+            "extracted_values": [
+                {"parameter": "Dust Mite IgE", "value": "15.4", "unit": "kUA/L", "reference_range": "<0.35", "status": "critical"},
+                {"parameter": "Timothy Grass IgE", "value": "4.2", "unit": "kUA/L", "reference_range": "<0.35", "status": "high"}
+            ],
+            "suggested_actions": [
+                "Use allergen-proof mattress and pillow covers",
+                "Consider taking over-the-counter antihistamines during high pollen season"
+            ],
+            "processed_at": "2026-03-12T16:00:00Z"
+        },
+        "created_at": firestore.SERVER_TIMESTAMP,
+        "updated_at": firestore.SERVER_TIMESTAMP
+    })
+
+    r3_3 = db.collection('records').document()
+    r3_3.set({
+        "id": r3_3.id,
+        "patient_uid": patient3_uid,
+        "uploaded_by": doctor_uid,
+        "type": "prescription",
+        "date": "2026-05-22T12:00:00Z",
+        "title": "Asthma Action Plan Inhaler",
+        "metadata": {
+            "hospital": "Pulmonary Health Clinic",
+            "doctor_name": "Dr. Emily Chen",
+            "notes": "For acute asthma flare-ups."
+        },
+        "ai_analysis": {
+            "summary": "Prescribed Albuterol HFA Inhaler for rescue use.",
+            "extracted_values": [
+                {"parameter": "Albuterol Inhaler", "value": "90", "unit": "mcg", "reference_range": "90 - 180", "status": "normal"}
+            ],
+            "suggested_actions": [
+                "Inhale 2 puffs every 4-6 hours as needed for shortness of breath or wheezing",
+                "Rinse mouth with water after use"
+            ],
+            "processed_at": "2026-05-22T12:15:00Z"
+        },
+        "created_at": firestore.SERVER_TIMESTAMP,
+        "updated_at": firestore.SERVER_TIMESTAMP
+    })
+
+    # ==================== SEEDING MEDICATIONS ====================
     print("Seeding medications...")
+    # Patient 1 Medications
     m1 = db.collection('medications').document()
     m1.set({
         "id": m1.id,
@@ -140,7 +519,62 @@ def seed_data():
         "created_at": firestore.SERVER_TIMESTAMP
     })
 
+    # Patient 2 Medications (John Doe)
+    m2_1 = db.collection('medications').document()
+    m2_1.set({
+        "id": m2_1.id,
+        "patient_uid": patient2_uid,
+        "name": "Lisinopril 10mg",
+        "dosage": "1 tablet",
+        "frequency": "once",
+        "timing": ["08:00"],
+        "start_date": "2026-05-20",
+        "end_date": "2026-11-20",
+        "instructions": "Take daily in the morning with or without food.",
+        "status": "active",
+        "prescribed_by": "Dr. Demo",
+        "adherence_log": [],
+        "created_at": firestore.SERVER_TIMESTAMP
+    })
+
+    m2_2 = db.collection('medications').document()
+    m2_2.set({
+        "id": m2_2.id,
+        "patient_uid": patient2_uid,
+        "name": "Omega-3 Fish Oil 1000mg",
+        "dosage": "1 capsule",
+        "frequency": "twice",
+        "timing": ["08:00", "20:00"],
+        "start_date": "2026-04-18",
+        "end_date": "2026-10-18",
+        "instructions": "Take with meals to minimize fishy aftertaste.",
+        "status": "active",
+        "prescribed_by": "Dr. Demo",
+        "adherence_log": [],
+        "created_at": firestore.SERVER_TIMESTAMP
+    })
+
+    # Patient 3 Medications (Jane Miller)
+    m3_1 = db.collection('medications').document()
+    m3_1.set({
+        "id": m3_1.id,
+        "patient_uid": patient3_uid,
+        "name": "Albuterol HFA Inhaler",
+        "dosage": "2 puffs",
+        "frequency": "as_needed",
+        "timing": [],
+        "start_date": "2026-05-22",
+        "end_date": "2027-05-22",
+        "instructions": "Inhale 2 puffs for wheezing or shortness of breath. Rinse mouth after use.",
+        "status": "active",
+        "prescribed_by": "Dr. Demo",
+        "adherence_log": [],
+        "created_at": firestore.SERVER_TIMESTAMP
+    })
+
     print("Seed data injected successfully!")
+
 
 if __name__ == '__main__':
     seed_data()
+

@@ -17,6 +17,7 @@ class RegisterRequest(BaseModel):
     name: str
     phone: Optional[str] = None
     role: str
+    passport_id: Optional[str] = None
 
 class VerifyOtpRequest(BaseModel):
     uid: str
@@ -49,8 +50,8 @@ def register():
         
         import random
         import string
-        passport_id = None
-        if data.role == 'patient':
+        passport_id = data.passport_id
+        if data.role == 'patient' and not passport_id:
             while True:
                 candidate = f"HP-{''.join(random.choices(string.digits, k=5))}"
                 existing = FirebaseService.query_documents('users', 'passport_id', '==', candidate)

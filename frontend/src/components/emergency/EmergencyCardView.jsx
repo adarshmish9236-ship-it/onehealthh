@@ -1,6 +1,6 @@
 import React from 'react'
 import { Card, CardContent } from '../ui/Card'
-import { Phone, AlertCircle, Heart, Pill, Stethoscope, Droplet } from 'lucide-react'
+import { Phone, AlertCircle, Heart, Pill, ShieldAlert, Droplet } from 'lucide-react'
 
 export default function EmergencyCardView({ profile }) {
   // Use mock data if profile is not provided
@@ -21,106 +21,115 @@ export default function EmergencyCardView({ profile }) {
   }
 
   return (
-    <Card className="border-danger/30 shadow-lg overflow-hidden bg-white">
-      {/* Red Header */}
-      <div className="bg-danger p-6 text-white text-center relative">
-        <AlertCircle size={48} className="mx-auto mb-2 opacity-90" />
-        <h2 className="text-2xl font-bold tracking-tight uppercase">Emergency Card</h2>
-        <p className="text-danger-100 font-medium opacity-90">MEDICAL INFORMATION</p>
+    <Card className="border border-slate-200/80 shadow-xl overflow-hidden bg-white/90 backdrop-blur-md rounded-2xl transition-all duration-300 hover:shadow-2xl">
+      {/* Premium Calming Header */}
+      <div className="bg-gradient-to-r from-rose-500 via-rose-600 to-red-600 p-8 text-white relative">
+        <div className="absolute top-0 right-0 p-6 opacity-10">
+          <ShieldAlert size={120} />
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-white/10 rounded-xl backdrop-blur-md border border-white/20">
+            <ShieldAlert size={32} className="text-white" />
+          </div>
+          <div className="text-left">
+            <h2 className="text-2xl font-bold tracking-tight">Digital Health Passport</h2>
+            <p className="text-rose-100 text-xs font-semibold uppercase tracking-wider mt-0.5">Emergency Medical Card</p>
+          </div>
+        </div>
       </div>
 
       <CardContent className="p-0">
         {/* Basic Info & Blood Group */}
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-red-50/50">
+        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
           <div>
-            <h3 className="text-2xl font-bold text-dark">{patient.name}</h3>
-            <p className="text-gray-600 font-medium">{patient.age} years old</p>
+            <h3 className="text-2xl font-extrabold text-slate-800">{patient.name}</h3>
+            <p className="text-slate-500 font-semibold text-sm mt-0.5">{patient.age} Years Old • Verified Patient</p>
           </div>
           <div className="text-center">
-            <div className="bg-danger text-white w-16 h-16 rounded-xl flex items-center justify-center text-3xl font-bold shadow-sm">
-              {patient.bloodGroup}
+            <div className="bg-rose-50 text-rose-600 border border-rose-200/60 w-16 h-16 rounded-2xl flex flex-col items-center justify-center shadow-sm">
+              <span className="text-2xl font-black">{patient.bloodGroup}</span>
+              <span className="text-[9px] font-black uppercase tracking-wider text-rose-500/80 -mt-1">Blood</span>
             </div>
-            <p className="text-xs text-danger font-bold mt-1 uppercase tracking-wide">Blood</p>
           </div>
         </div>
 
         {/* Medical Data Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x border-b border-gray-100">
+        <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-100 border-b border-slate-100">
           {/* Allergies & Diseases */}
           <div className="p-6 space-y-6">
             <div>
-              <h4 className="flex items-center gap-2 font-bold text-dark mb-3 text-lg">
-                <AlertCircle size={20} className="text-danger" /> Known Allergies
+              <h4 className="flex items-center gap-2 font-bold text-slate-800 mb-3 text-base">
+                <AlertCircle size={18} className="text-rose-500" /> Known Allergies
               </h4>
               {patient.allergies.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {patient.allergies.map(a => (
-                    <span key={a} className="bg-red-100 text-red-800 px-3 py-1 rounded-md font-semibold text-sm border border-red-200">
+                    <span key={a} className="bg-rose-50 text-rose-700 px-3 py-1 rounded-lg font-semibold text-xs border border-rose-100/80">
                       {a}
                     </span>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 font-medium">None Known</p>
+                <p className="text-slate-400 font-medium text-sm">No known allergies</p>
               )}
             </div>
 
             <div>
-              <h4 className="flex items-center gap-2 font-bold text-dark mb-3 text-lg">
-                <Heart size={20} className="text-orange-500" /> Chronic Diseases
+              <h4 className="flex items-center gap-2 font-bold text-slate-800 mb-3 text-base">
+                <Heart size={18} className="text-amber-500" /> Chronic Conditions
               </h4>
               {patient.chronicDiseases.length > 0 ? (
-                <ul className="list-disc pl-5 space-y-1">
+                <div className="flex flex-wrap gap-2">
                   {patient.chronicDiseases.map(d => (
-                    <li key={d} className="font-semibold text-gray-800">{d}</li>
+                    <span key={d} className="bg-amber-50 text-amber-700 px-3 py-1 rounded-lg font-semibold text-xs border border-amber-100/80">
+                      {d}
+                    </span>
                   ))}
-                </ul>
+                </div>
               ) : (
-                <p className="text-gray-500 font-medium">None Known</p>
+                <p className="text-slate-400 font-medium text-sm">No chronic conditions listed</p>
               )}
             </div>
           </div>
 
-          {/* Medications & Contacts */}
-          <div className="p-6 space-y-6">
-            <div>
-              <h4 className="flex items-center gap-2 font-bold text-dark mb-3 text-lg">
-                <Pill size={20} className="text-blue-500" /> Current Medications
-              </h4>
-              {patient.medications.length > 0 ? (
-                <div className="space-y-3">
-                  {patient.medications.map(m => (
-                    <div key={m.name} className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                      <div className="font-bold text-dark">{m.name}</div>
-                      <div className="text-sm text-gray-600 font-medium">{m.dosage}</div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 font-medium">None</p>
-              )}
-            </div>
+          {/* Medications & Actions */}
+          <div className="p-6">
+            <h4 className="flex items-center gap-2 font-bold text-slate-800 mb-3 text-base">
+              <Pill size={18} className="text-sky-500" /> Active Medications
+            </h4>
+            {patient.medications.length > 0 ? (
+              <div className="space-y-2">
+                {patient.medications.map(m => (
+                  <div key={m.name} className="bg-slate-50/60 p-3 rounded-xl border border-slate-100">
+                    <div className="font-bold text-slate-800 text-sm">{m.name}</div>
+                    <div className="text-xs text-slate-500 font-semibold mt-0.5">{m.dosage}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-slate-400 font-medium text-sm">No active medications</p>
+            )}
           </div>
         </div>
 
         {/* Emergency Contacts */}
-        <div className="p-6 bg-gray-50">
-          <h4 className="flex items-center gap-2 font-bold text-dark mb-4 text-lg">
-            <Phone size={20} className="text-green-600" /> Emergency Contacts
+        <div className="p-6 bg-slate-50/30">
+          <h4 className="flex items-center gap-2 font-bold text-slate-800 mb-4 text-base">
+            <Phone size={18} className="text-emerald-500" /> Primary Emergency Contacts
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {patient.contacts.map(c => (
               <a 
                 key={c.name} 
                 href={`tel:${c.phone}`}
-                className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:border-green-400 hover:shadow-md transition-all group"
+                className="flex items-center justify-between p-4 bg-white border border-slate-200/60 rounded-xl hover:border-emerald-400 hover:shadow-md transition-all duration-200 group"
               >
                 <div>
-                  <div className="font-bold text-dark">{c.name}</div>
-                  <div className="text-xs font-semibold uppercase tracking-wider text-gray-500">{c.relationship}</div>
+                  <div className="font-bold text-slate-800 text-sm">{c.name}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-0.5">{c.relationship}</div>
                 </div>
-                <div className="bg-green-100 p-3 rounded-lg text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors">
-                  <Phone size={20} />
+                <div className="bg-emerald-50 p-2.5 rounded-lg text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-250">
+                  <Phone size={16} />
                 </div>
               </a>
             ))}

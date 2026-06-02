@@ -18,7 +18,8 @@ export const authService = {
       password,
       name: displayName,
       phone: extraData.phone || undefined, // Backend phone is Optional
-      role
+      role,
+      passport_id: extraData.passportId || undefined
     })
 
     // 2. Sign in to the Firebase client SDK
