@@ -172,19 +172,19 @@ export default function Landing() {
         )}
       </AnimatePresence>
 
-      {/* Navigation (Floating Pill) */}
-      <div className="fixed top-6 left-0 right-0 z-[90] flex justify-center px-4">
+      {/* Navigation (Refined) */}
+      <div className="relative py-6 flex justify-center px-4">
         <motion.header 
-          initial={{ y: -100, opacity: 0 }}
+          initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-4xl h-14 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/50 dark:border-slate-700/30 rounded-full px-6 flex items-center justify-between shadow-xl shadow-slate-900/5"
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-7xl h-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-6 flex items-center justify-between shadow-sm"
         >
           <Link to="/" className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center shadow-sm bg-white">
               <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
             </div>
-            <span className="font-black text-lg text-slate-900 dark:text-white tracking-tighter">oneHealth</span>
+            <span className="font-black text-xl text-slate-900 dark:text-white tracking-tighter">oneHealth</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
@@ -197,7 +197,7 @@ export default function Landing() {
             <button onClick={() => setAuthIntent('login')} className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white px-4 hover:opacity-70 transition-opacity">
               Log In
             </button>
-            <Button size="sm" className="rounded-full px-5 py-2 h-9 text-xs font-bold uppercase tracking-widest" onClick={() => setAuthIntent('register')}>
+            <Button size="sm" className="rounded-xl px-6 py-2 h-10 text-xs font-bold uppercase tracking-widest" onClick={() => setAuthIntent('register')}>
               Join
             </Button>
           </div>
@@ -205,11 +205,11 @@ export default function Landing() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative min-h-[100dvh] flex flex-col items-center justify-center px-4 pt-32 pb-20 overflow-hidden">
+      <section className="relative min-h-[80dvh] flex flex-col items-center justify-center px-4 pt-20 pb-20 overflow-hidden">
         {/* Background elements */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none overflow-hidden opacity-50">
-          <div className="absolute top-[10%] left-[20%] w-[40rem] h-[40rem] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
-          <div className="absolute bottom-[20%] right-[10%] w-[30rem] h-[30rem] bg-purple-500/10 rounded-full blur-[120px]" />
+          <div className="absolute top-[10%] left-[20%] w-[40rem] h-[40rem] bg-primary/10 rounded-3xl blur-[120px] animate-pulse" />
+          <div className="absolute bottom-[20%] right-[10%] w-[30rem] h-[30rem] bg-purple-500/10 rounded-3xl blur-[120px]" />
         </div>
 
         <div className="w-full max-w-6xl mx-auto text-center relative z-10">
@@ -217,9 +217,9 @@ export default function Landing() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-10"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-black uppercase tracking-[0.2em] text-primary mb-10"
           >
-            <Zap size={10} /> Lifelong Health Passport
+            <Zap size={14} /> Lifelong Health Passport
           </motion.div>
 
           <motion.h1
@@ -246,38 +246,19 @@ export default function Landing() {
             transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
-            <Button size="xl" className="rounded-full px-10 h-16 text-sm font-bold uppercase tracking-widest shadow-2xl shadow-primary/25 group" onClick={() => setAuthIntent('register')}>
+            <Button size="xl" className="rounded-2xl px-12 h-16 text-sm font-bold uppercase tracking-widest shadow-xl shadow-primary/25 group" onClick={() => setAuthIntent('register')}>
               Create Account 
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center ml-2 group-hover:translate-x-1 transition-transform">
+              <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center ml-2 group-hover:translate-x-1 transition-transform">
                 <ArrowRight size={18} />
               </div>
             </Button>
             <Link to="/emergency/demo">
-              <Button size="xl" variant="outline" className="rounded-full px-10 h-16 text-sm font-bold uppercase tracking-widest border-2">
+              <Button size="xl" variant="outline" className="rounded-2xl px-12 h-16 text-sm font-bold uppercase tracking-widest border-2">
                 Emergency Demo
               </Button>
             </Link>
           </motion.div>
         </div>
-
-        {/* Hero Image / Mockup */}
-        <motion.div 
-          initial={{ opacity: 0, y: 100 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-24 w-full max-w-5xl mx-auto px-4 perspective-1000"
-        >
-          <div className="relative rounded-[3rem] p-2 bg-slate-200/50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/50 shadow-2xl overflow-hidden rotate-x-6">
-            <div className="bg-white dark:bg-slate-900 rounded-[calc(3rem-0.5rem)] overflow-hidden aspect-[16/9]">
-              <img 
-                src="/dashboard_mockup.png" 
-                alt="oneHealth Dashboard" 
-                className="w-full h-full object-cover opacity-90"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent" />
-            </div>
-          </div>
-        </motion.div>
       </section>
 
       {/* Trust Section (Infinite Marquee) */}

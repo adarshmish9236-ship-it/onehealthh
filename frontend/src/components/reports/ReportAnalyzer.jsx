@@ -15,26 +15,6 @@ import { useUserStore } from '../../store/userStore'
 
 const STEPS = ['Uploading', 'Extracting Text', 'Analyzing Values', 'Generating Summary']
 
-const MOCK_ANALYSIS = {
-  report_type: 'Complete Blood Count (CBC)',
-  extracted_values: [
-    { parameter: 'Haemoglobin', value: '11.2', unit: 'g/dL', reference_range: '12.0–16.0', status: 'low', plain_explanation: 'Your haemoglobin is slightly below normal — this may indicate mild anaemia.' },
-    { parameter: 'WBC Count', value: '6,800', unit: 'cells/μL', reference_range: '4,500–11,000', status: 'normal', plain_explanation: 'Your white blood cell count is normal — no signs of active infection.' },
-    { parameter: 'Platelets', value: '2,45,000', unit: '/μL', reference_range: '1,50,000–4,00,000', status: 'normal', plain_explanation: 'Platelet count is in the healthy range — good blood clotting ability.' },
-    { parameter: 'Fasting Glucose', value: '98', unit: 'mg/dL', reference_range: '70–100', status: 'normal', plain_explanation: 'Fasting blood sugar is within normal range. Your glucose regulation is good.' },
-    { parameter: 'Serum Iron', value: '52', unit: 'μg/dL', reference_range: '60–170', status: 'low', plain_explanation: 'Iron levels are slightly low, which may be contributing to the low haemoglobin.' },
-  ],
-  overall_summary: 'Your blood report shows mild iron-deficiency anaemia. Most other parameters including white blood cells, platelets, and blood sugar are within normal ranges. The low iron and haemoglobin values suggest you may benefit from dietary changes or iron supplementation.',
-  abnormal_findings: ['Haemoglobin below normal range', 'Serum Iron slightly low'],
-  suggested_actions: [
-    'Increase iron-rich foods: spinach, lentils, red meat, fortified cereals.',
-    'Take Vitamin C with meals to enhance iron absorption.',
-    'Consider iron supplementation after consulting your doctor.',
-    'Retest CBC and iron profile in 3 months.',
-  ],
-  urgency: 'routine',
-}
-
 const statusIcons = {
   normal:   { icon: <Minus size={12} />,      color: 'bg-emerald-100 text-emerald-700' },
   high:     { icon: <TrendingUp size={12} />,  color: 'bg-red-100 text-red-700' },
@@ -79,7 +59,6 @@ export default function ReportAnalyzer() {
       }
       formData.append('patient_context', JSON.stringify(patient_context))
 
-      // Simulate steps while waiting for AI
       const stepInterval = setInterval(() => {
         setCurrentStep(prev => (prev < STEPS.length - 1 ? prev + 1 : prev))
         setProgress(prev => (prev < 90 ? prev + 20 : prev))
@@ -132,7 +111,6 @@ export default function ReportAnalyzer() {
       <AnimatePresence mode="wait">
         {step === 'upload' && (
           <motion.div key="upload" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="space-y-5">
-            {/* Report Type */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { id: 'report',        label: 'Blood Test' },
@@ -155,7 +133,6 @@ export default function ReportAnalyzer() {
               ))}
             </div>
 
-            {/* Dropzone */}
             <div
               {...getRootProps()}
               className={cn(
@@ -229,7 +206,6 @@ export default function ReportAnalyzer() {
 
         {step === 'results' && result && (
           <motion.div key="results" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-            {/* Summary Card */}
             <div className="rounded-2xl bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-100 p-6">
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles size={18} className="text-purple-600" />
@@ -245,7 +221,6 @@ export default function ReportAnalyzer() {
               )}
             </div>
 
-            {/* Extracted Values Table */}
             <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
               <div className="px-5 py-4 border-b border-[var(--color-border)]">
                 <h3 className="font-bold text-lg text-[var(--color-text-primary)]">Extracted Values</h3>
@@ -260,7 +235,7 @@ export default function ReportAnalyzer() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--color-border)]">
-                    {result.extracted_values.map((v, i) => {
+                    {result.extracted_values?.map((v, i) => {
                       const s = statusIcons[v.status] || statusIcons.normal
                       return (
                         <tr key={i} className={cn('hover:bg-[var(--color-surface-2)] transition-colors', v.status !== 'normal' ? 'bg-amber-50/50' : '')}>
@@ -281,11 +256,10 @@ export default function ReportAnalyzer() {
               </div>
             </div>
 
-            {/* Suggested Actions */}
             <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
               <h3 className="font-bold text-lg text-[var(--color-text-primary)] mb-4">Suggested Actions</h3>
               <ol className="space-y-3">
-                {result.suggested_actions.map((a, i) => (
+                {result.suggested_actions?.map((a, i) => (
                   <li key={i} className="flex gap-3 text-sm text-[var(--color-text-primary)]">
                     <span className="w-6 h-6 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center flex-shrink-0 font-bold text-xs">{i + 1}</span>
                     {a}

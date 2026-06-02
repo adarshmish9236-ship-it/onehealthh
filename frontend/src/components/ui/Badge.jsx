@@ -20,14 +20,14 @@ export const Badge = ({ className, variant = 'default', size = 'sm', dot = false
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full font-medium',
+        'inline-flex items-center gap-1.5 rounded-md font-medium',
         badgeVariants[variant] || badgeVariants.default,
         sizes[size] || sizes.sm,
         className
       )}
       {...props}
     >
-      {dot && <span className="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0" />}
+      {dot && <span className="w-1.5 h-1.5 rounded-sm bg-current flex-shrink-0" />}
       {children}
     </span>
   )

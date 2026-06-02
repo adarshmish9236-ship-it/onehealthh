@@ -15,34 +15,6 @@ import { SYMPTOM_CATEGORIES, DURATION_OPTIONS } from '../../utils/constants'
 import { cn } from '../../utils/formatters'
 import { aiService } from '../../services/aiService'
 
-const MOCK_AI_RESULT = {
-  severity: 'medium',
-  severity_explanation: 'Your symptoms suggest a common respiratory infection. Monitor closely and seek care if symptoms worsen.',
-  possible_conditions: [
-    { name: 'Viral URI (Common Cold)', explanation: 'A viral infection affecting your nose and throat. Usually resolves in 7–10 days.', confidence: 'high' },
-    { name: 'Influenza (Flu)', explanation: 'A more severe viral infection. Characterized by sudden onset and body aches.', confidence: 'medium' },
-    { name: 'Allergic Rhinitis', explanation: 'Nasal inflammation caused by allergens like pollen or dust.', confidence: 'low' },
-  ],
-  recommendations: [
-    'Rest as much as possible and stay well-hydrated.',
-    'Monitor your temperature every 4–6 hours.',
-    'Use steam inhalation or a humidifier to relieve congestion.',
-    'Avoid close contact with others to prevent spread.',
-  ],
-  otc_suggestions: [
-    { medicine: 'Paracetamol 500mg', dosage_note: '1 tablet every 6 hours for fever/pain' },
-    { medicine: 'Saline Nasal Spray', dosage_note: '2–3 sprays per nostril, 3–4 times daily' },
-    { medicine: 'Cetirizine 10mg', dosage_note: '1 tablet at night for runny nose' },
-  ],
-  warning_signs: [
-    'Fever exceeds 103°F (39.4°C)',
-    'Difficulty breathing or chest pain develops',
-    'Symptoms worsen significantly after 3 days',
-  ],
-  seek_emergency: false,
-  disclaimer: 'This is AI guidance only. Consult a qualified doctor for an accurate diagnosis and treatment.',
-}
-
 function SymptomChip({ symptom, selected, onToggle }) {
   return (
     <motion.button
@@ -67,7 +39,7 @@ function ResultsView({ result, onReset, onSave }) {
     low:    { gradient: 'from-emerald-500 to-green-600', bg: 'from-emerald-50 to-green-50', border: 'border-emerald-200', text: 'text-emerald-900', icon: '✓' },
     medium: { gradient: 'from-amber-500 to-orange-500', bg: 'from-amber-50 to-orange-50', border: 'border-amber-200', text: 'text-amber-900', icon: '⚠' },
     high:   { gradient: 'from-red-500 to-rose-600', bg: 'from-red-50 to-rose-50', border: 'border-red-200', text: 'text-red-900', icon: '🚨' },
-  }[result.severity] || {}
+  }[result.severity] || { gradient: 'from-slate-500 to-slate-600', bg: 'from-slate-50 to-slate-50', border: 'border-slate-200', text: 'text-slate-900', icon: '?' }
 
   return (
     <motion.div
@@ -75,7 +47,6 @@ function ResultsView({ result, onReset, onSave }) {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
-      {/* Severity Banner */}
       <div className={cn('rounded-2xl overflow-hidden border', cfg.border)}>
         <div className={cn('bg-gradient-to-r p-5 text-white', cfg.gradient)}>
           <div className="flex items-center gap-3">
@@ -101,11 +72,10 @@ function ResultsView({ result, onReset, onSave }) {
       </div>
 
       <div className="grid md:grid-cols-2 gap-5">
-        {/* Possible Conditions */}
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 space-y-4">
           <h3 className="font-bold text-lg text-[var(--color-text-primary)]">Possible Conditions</h3>
           <div className="space-y-3">
-            {result.possible_conditions.map((cond, i) => (
+            {result.possible_conditions?.map((cond, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: -10 }}
@@ -131,11 +101,10 @@ function ResultsView({ result, onReset, onSave }) {
         </div>
 
         <div className="space-y-5">
-          {/* Recommendations */}
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
             <h3 className="font-bold text-lg text-[var(--color-text-primary)] mb-3">What to Do Now</h3>
             <ol className="space-y-2">
-              {result.recommendations.map((rec, i) => (
+              {result.recommendations?.map((rec, i) => (
                 <li key={i} className="flex gap-3 text-sm text-[var(--color-text-primary)]">
                   <span className="w-6 h-6 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center flex-shrink-0 font-bold text-xs">
                     {i + 1}
@@ -146,13 +115,12 @@ function ResultsView({ result, onReset, onSave }) {
             </ol>
           </div>
 
-          {/* OTC Suggestions */}
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
             <h3 className="font-bold text-lg text-[var(--color-text-primary)] mb-3 flex items-center gap-2">
               <Pill size={18} className="text-[var(--color-primary)]" /> OTC Suggestions
             </h3>
             <div className="space-y-2">
-              {result.otc_suggestions.map((m, i) => (
+              {result.otc_suggestions?.map((m, i) => (
                 <div key={i} className="p-3 bg-blue-50 rounded-xl border border-blue-100">
                   <p className="text-sm font-bold text-blue-900">{m.medicine}</p>
                   <p className="text-xs text-blue-700">{m.dosage_note}</p>
@@ -161,7 +129,6 @@ function ResultsView({ result, onReset, onSave }) {
             </div>
           </div>
 
-          {/* Warning Signs */}
           {result.warning_signs?.length > 0 && (
             <Alert type="warning" title="⚠ Warning Signs — Seek Care If:">
               <ul className="list-disc pl-4 space-y-1 mt-1">
@@ -259,7 +226,6 @@ export default function SymptomAnalyzer() {
 
   return (
     <div className="page-container py-6 space-y-6 max-w-4xl mx-auto">
-      {/* Header */}
       <div className="text-center">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--color-primary)] to-purple-600 mb-4">
           <Stethoscope size={28} className="text-white" />
@@ -279,7 +245,6 @@ export default function SymptomAnalyzer() {
             exit={{ opacity: 0, y: -16 }}
             className="space-y-5"
           >
-            {/* Selected Symptoms */}
             {selectedSymptoms.length > 0 && (
               <div className="p-4 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)]">
                 <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
@@ -298,7 +263,6 @@ export default function SymptomAnalyzer() {
               </div>
             )}
 
-            {/* Custom Symptom Input */}
             <form onSubmit={addCustom} className="flex gap-2">
               <div className="relative flex-1">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
@@ -313,7 +277,6 @@ export default function SymptomAnalyzer() {
               <Button type="submit" variant="outline" leftIcon={<Plus size={14} />}>Add</Button>
             </form>
 
-            {/* Category Tabs */}
             <div>
               <div className="flex gap-1.5 overflow-x-auto pb-2">
                 {categories.map(cat => (
@@ -344,7 +307,6 @@ export default function SymptomAnalyzer() {
               </div>
             </div>
 
-            {/* Duration Picker */}
             <div>
               <p className="text-sm font-semibold text-[var(--color-text-primary)] mb-3 flex items-center gap-2">
                 <Clock size={14} className="text-[var(--color-primary)]" />
@@ -368,7 +330,6 @@ export default function SymptomAnalyzer() {
               </div>
             </div>
 
-            {/* Analyze Button */}
             <Button
               onClick={handleAnalyze}
               className="w-full h-14 text-lg font-bold"
@@ -406,16 +367,6 @@ export default function SymptomAnalyzer() {
               <p className="text-sm text-[var(--color-text-secondary)] mt-1">
                 Comparing with medical database using Gemini AI
               </p>
-            </div>
-            <div className="flex gap-1">
-              {[0, 1, 2].map(i => (
-                <motion.div
-                  key={i}
-                  animate={{ scale: [1, 1.4, 1] }}
-                  transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.2 }}
-                  className="w-2 h-2 rounded-full bg-[var(--color-primary)]"
-                />
-              ))}
             </div>
           </motion.div>
         )}

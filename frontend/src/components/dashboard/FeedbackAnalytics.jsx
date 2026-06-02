@@ -14,15 +14,7 @@ import { Button } from '../ui/Button'
 import { Alert, Spinner } from '../ui/index'
 import { Badge } from '../ui/Badge'
 import { cn } from '../../utils/formatters'
-
-const MOCK_SENTIMENT_RESULT = {
-  sentiment: 'positive',
-  confidence: 87,
-  positive_themes: ['Clear Explanation', 'Compassionate Care', 'Fast Response', 'Professional'],
-  negative_themes: ['Wait Time', 'Prescription Clarity'],
-  key_topics: ['Doctor Communication', 'Treatment Plan', 'Follow-Up', 'Diagnosis'],
-  summary: 'The patient expressed high satisfaction with the quality of care and doctor communication. Minor concerns about waiting time and prescription clarity were noted.',
-}
+import { aiService } from '../../services/aiService'
 
 const OVERALL_STATS = {
   satisfaction: 82,
@@ -77,7 +69,7 @@ function SentimentCard({ result }) {
     positive: { color: 'text-emerald-700', bg: 'from-emerald-50 to-green-50', border: 'border-emerald-200', icon: <ThumbsUp size={20} className="text-emerald-600" />, label: 'Positive' },
     negative: { color: 'text-red-700', bg: 'from-red-50 to-rose-50', border: 'border-red-200', icon: <ThumbsDown size={20} className="text-red-600" />, label: 'Negative' },
     neutral:  { color: 'text-slate-700', bg: 'from-slate-50 to-gray-50', border: 'border-slate-200', icon: <Minus size={20} className="text-slate-500" />, label: 'Neutral' },
-  }[result.sentiment]
+  }[result.sentiment] || { color: 'text-slate-700', bg: 'from-slate-50 to-gray-50', border: 'border-slate-200', icon: <Minus size={20} className="text-slate-500" />, label: 'Neutral' }
 
   return (
     <motion.div
@@ -85,7 +77,6 @@ function SentimentCard({ result }) {
       animate={{ opacity: 1, scale: 1 }}
       className={cn('rounded-2xl border p-5 bg-gradient-to-br space-y-4', cfg.bg, cfg.border)}
     >
-      {/* Sentiment Header */}
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-xl bg-white/80 shadow-sm">{cfg.icon}</div>
         <div>
@@ -102,12 +93,11 @@ function SentimentCard({ result }) {
 
       <p className="text-sm text-[var(--color-text-primary)] bg-white/50 p-3 rounded-xl">{result.summary}</p>
 
-      {/* Themes */}
       <div className="grid grid-cols-2 gap-3">
         <div>
           <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-2 flex items-center gap-1"><TrendingUp size={10} /> Positive Themes</p>
           <div className="flex flex-wrap gap-1.5">
-            {result.positive_themes.map(t => (
+            {result.positive_themes?.map(t => (
               <span key={t} className="text-xs px-2 py-1 bg-emerald-100 text-emerald-800 rounded-full font-medium">{t}</span>
             ))}
           </div>
@@ -115,18 +105,17 @@ function SentimentCard({ result }) {
         <div>
           <p className="text-xs font-bold text-red-600 uppercase tracking-wider mb-2 flex items-center gap-1"><TrendingDown size={10} /> Negative Themes</p>
           <div className="flex flex-wrap gap-1.5">
-            {result.negative_themes.map(t => (
+            {result.negative_themes?.map(t => (
               <span key={t} className="text-xs px-2 py-1 bg-red-100 text-red-800 rounded-full font-medium">{t}</span>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Key Topics */}
       <div>
         <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2 flex items-center gap-1"><Hash size={10} /> Key Topics</p>
         <div className="flex flex-wrap gap-1.5">
-          {result.key_topics.map(t => (
+          {result.key_topics?.map(t => (
             <span key={t} className="text-xs px-2.5 py-1 bg-white/80 border border-[var(--color-border)] text-[var(--color-text-secondary)] rounded-full font-medium">{t}</span>
           ))}
         </div>
@@ -134,8 +123,6 @@ function SentimentCard({ result }) {
     </motion.div>
   )
 }
-
-import { aiService } from '../../services/aiService'
 
 export default function FeedbackAnalytics() {
   const [feedback, setFeedback] = useState('')
@@ -158,15 +145,12 @@ export default function FeedbackAnalytics() {
 
   return (
     <div className="page-container py-6 space-y-8">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Patient Feedback Analytics</h1>
         <p className="text-[var(--color-text-secondary)] mt-0.5">AI-powered sentiment analysis for healthcare interactions</p>
       </div>
 
-      {/* Analytics Dashboard */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Overall Satisfaction */}
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
           <h3 className="font-bold text-[var(--color-text-primary)] mb-4">Overall Satisfaction</h3>
           <div className="flex flex-col items-center">
@@ -198,7 +182,6 @@ export default function FeedbackAnalytics() {
           </div>
         </div>
 
-        {/* Sentiment Distribution */}
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
           <h3 className="font-bold text-[var(--color-text-primary)] mb-4">Sentiment Distribution</h3>
           <ResponsiveContainer width="100%" height={180}>
@@ -221,7 +204,6 @@ export default function FeedbackAnalytics() {
           </div>
         </div>
 
-        {/* Sentiment Trend */}
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
           <h3 className="font-bold text-[var(--color-text-primary)] mb-4">Sentiment Trend</h3>
           <ResponsiveContainer width="100%" height={200}>
@@ -237,9 +219,7 @@ export default function FeedbackAnalytics() {
         </div>
       </div>
 
-      {/* Top Complaints / Appreciations */}
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Top Complaints */}
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
           <h3 className="font-bold text-lg text-[var(--color-text-primary)] mb-4 flex items-center gap-2">
             <TrendingDown size={18} className="text-red-500" /> Top Complaints
@@ -264,7 +244,6 @@ export default function FeedbackAnalytics() {
           </div>
         </div>
 
-        {/* Top Appreciations */}
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
           <h3 className="font-bold text-lg text-[var(--color-text-primary)] mb-4 flex items-center gap-2">
             <TrendingUp size={18} className="text-emerald-500" /> Top Appreciations
@@ -290,7 +269,6 @@ export default function FeedbackAnalytics() {
         </div>
       </div>
 
-      {/* Feedback Input */}
       <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-4">
         <h3 className="font-bold text-lg text-[var(--color-text-primary)] flex items-center gap-2">
           <MessageSquare size={18} className="text-[var(--color-primary)]" /> Analyze New Feedback
@@ -320,7 +298,7 @@ export default function FeedbackAnalytics() {
         <textarea
           value={feedback}
           onChange={e => setFeedback(e.target.value)}
-          placeholder="Paste patient feedback here... e.g., 'The doctor was very attentive and explained my condition clearly. However, the wait time was quite long — about 45 minutes past my appointment.'"
+          placeholder="Paste patient feedback here..."
           className="w-full min-h-[120px] px-4 py-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none"
         />
 
@@ -334,7 +312,6 @@ export default function FeedbackAnalytics() {
           Analyze Sentiment with AI
         </Button>
 
-        {/* Result */}
         <AnimatePresence>
           {result && <SentimentCard result={result} />}
         </AnimatePresence>

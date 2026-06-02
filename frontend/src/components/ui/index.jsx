@@ -62,12 +62,12 @@ export function ProgressBar({ value = 0, max = 100, color = 'primary', size = 'm
           {showPercent && <span className="text-xs font-medium text-[var(--color-text-primary)]">{Math.round(percent)}%</span>}
         </div>
       )}
-      <div className={cn('w-full bg-[var(--color-surface-2)] rounded-full overflow-hidden', sizeMap[size])}>
+      <div className={cn('w-full bg-[var(--color-surface-2)] rounded-lg overflow-hidden', sizeMap[size])}>
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${percent}%` }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
-          className={cn('h-full rounded-full', colorMap[color] || colorMap.primary)}
+          className={cn('h-full rounded-lg', colorMap[color] || colorMap.primary)}
         />
       </div>
     </div>
@@ -96,7 +96,7 @@ export function Avatar({ src, name = '', size = 'md', className }) {
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
 
   return (
-    <div className={cn('rounded-full bg-gradient-to-br from-[var(--color-primary)] to-purple-600 flex items-center justify-center font-semibold text-white flex-shrink-0 overflow-hidden', sizeMap[size], className)}>
+    <div className={cn('rounded-2xl bg-gradient-to-br from-[var(--color-primary)] to-purple-600 flex items-center justify-center font-semibold text-white flex-shrink-0 overflow-hidden', sizeMap[size], className)}>
       {src ? <img src={src} alt={name} className="w-full h-full object-cover" /> : <span>{initials}</span>}
     </div>
   )
@@ -107,7 +107,7 @@ export function Spinner({ size = 'md', color = 'primary', className }) {
   const sizeMap = { xs: 'w-3 h-3', sm: 'w-4 h-4', md: 'w-6 h-6', lg: 'w-8 h-8', xl: 'w-12 h-12' }
   const colorMap = { primary: 'border-[var(--color-primary)]', white: 'border-white', muted: 'border-[var(--color-text-muted)]' }
   return (
-    <div className={cn('rounded-full border-2 border-transparent animate-spin', sizeMap[size], colorMap[color], className)}
+    <div className={cn('rounded-xl border-2 border-transparent animate-spin', sizeMap[size], colorMap[color], className)}
       style={{ borderTopColor: 'currentColor' }}
     />
   )

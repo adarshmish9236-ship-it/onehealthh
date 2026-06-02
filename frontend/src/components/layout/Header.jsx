@@ -90,10 +90,81 @@ function UserMenu({ profile, onLogout }) {
   )
 }
 
+function NotificationsMenu() {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+  const count = useUIStore(s => s.notificationCount)
+  const setCount = useUIStore(s => s.setNotificationCount)
+
+  const sampleNotifications = [
+    { id: '1', title: 'Welcome to oneHealth!', message: 'Your health passport is active. You can now upload reports and check symptoms.', time: 'Just now', unread: true },
+    { id: '2', title: 'Gemini AI Ready', message: 'Report parsing and symptom analysis models have been initialized.', time: '1 hour ago', unread: true },
+    { id: '3', title: 'Profile Configured', message: 'Your patient context has been securely synchronized with the database.', time: '2 hours ago', unread: true }
+  ]
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const handleClear = () => {
+    setCount(0)
+  }
+
+  return (
+    <div className="relative flex items-center" ref={ref}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="relative p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] transition-colors cursor-pointer"
+        aria-label="Notifications"
+      >
+        <Bell size={18} />
+        {count > 0 && (
+          <span className="absolute top-1 right-1 w-4 h-4 bg-[var(--color-danger)] text-white text-[10px] font-bold rounded-lg flex items-center justify-center animate-pulse">
+            {count}
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+          <div className="px-4 py-3 border-b border-[var(--color-border)] flex items-center justify-between bg-[var(--color-surface-2)]">
+            <span className="text-sm font-bold text-[var(--color-text-primary)]">Notifications</span>
+            {count > 0 && (
+              <button onClick={handleClear} className="text-xs font-semibold text-[var(--color-primary)] hover:underline cursor-pointer">
+                Mark all as read
+              </button>
+            )}
+          </div>
+
+          <div className="divide-y divide-[var(--color-border)] max-h-72 overflow-y-auto">
+            {count > 0 ? (
+              sampleNotifications.map(n => (
+                <div key={n.id} className="p-4 hover:bg-[var(--color-surface-2)] transition-colors cursor-pointer flex gap-3">
+                  <div className="w-2 h-2 rounded-lg bg-[var(--color-primary)] mt-1.5 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-[var(--color-text-primary)] truncate">{n.title}</p>
+                    <p className="text-xs text-[var(--color-text-secondary)] mt-0.5 leading-relaxed">{n.message}</p>
+                    <p className="text-[10px] text-[var(--color-text-muted)] mt-1 font-semibold uppercase">{n.time}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-8 text-center text-xs text-[var(--color-text-muted)]">
+                No new notifications
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function Header({ title, subtitle }) {
   const profile = useUserStore(s => s.profile)
   const healthMetrics = useUserStore(s => s.healthMetrics)
-  const notificationCount = useUIStore(s => s.notificationCount)
   const logout = useAuthStore(s => s.logout)
   const clearProfile = useUserStore(s => s.clearProfile)
   const clearRecords = useRecordsStore(s => s.clearRecords)
@@ -114,7 +185,7 @@ export function Header({ title, subtitle }) {
   }
 
   return (
-    <header className="sticky top-0 z-20 h-16 border-b border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-sm flex items-center px-4 sm:px-6 gap-4">
+    <header className="h-16 border-b border-[var(--color-border)] bg-[var(--color-surface)] flex items-center px-4 sm:px-6 gap-4">
       {/* Page Title */}
       <div className="flex-1 min-w-0">
         {title && (
@@ -127,10 +198,10 @@ export function Header({ title, subtitle }) {
 
       {/* Actions */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        {/* Health Score Pill — only shown when data exists */}
+        {/* Health Score Badge — only shown when data exists */}
         {score > 0 && (
-          <div className={cn('hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold', scoreBg, scoreColor)}>
-            <div className="w-2 h-2 rounded-full bg-current" />
+          <div className={cn('hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold', scoreBg, scoreColor)}>
+            <div className="w-2 h-2 rounded-sm bg-current" />
             {score} / 100
           </div>
         )}
@@ -146,18 +217,8 @@ export function Header({ title, subtitle }) {
         {/* Theme Toggle */}
         <ThemeToggle />
 
-        {/* Notifications */}
-        <button
-          className="relative p-2 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] transition-colors cursor-pointer"
-          aria-label="Notifications"
-        >
-          <Bell size={18} />
-          {notificationCount > 0 && (
-            <span className="absolute top-1 right-1 w-4 h-4 bg-[var(--color-danger)] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-              {notificationCount}
-            </span>
-          )}
-        </button>
+        {/* Notifications Dropdown */}
+        <NotificationsMenu />
 
         {/* User Menu with Logout */}
         <UserMenu profile={profile} onLogout={handleLogout} />
