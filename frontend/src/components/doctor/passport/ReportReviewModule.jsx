@@ -11,33 +11,6 @@ import {
 } from 'lucide-react'
 import { Button } from '../../ui'
 
-const REPORTS = [
-  {
-    id: 'R-102',
-    title: 'Lipid Profile & HbA1c',
-    date: '12 May 2026',
-    lab: 'City Diagnostic Center',
-    type: 'Blood Report',
-    aiSummary: {
-      status: 'Warning',
-      text: 'Elevated LDL Cholesterol (160 mg/dL). HbA1c is borderline at 6.2%. Liver enzymes (AST/ALT) are within normal limits.',
-      flags: ['High LDL', 'Borderline HbA1c']
-    }
-  },
-  {
-    id: 'R-098',
-    title: 'Chest X-Ray (PA View)',
-    date: '10 May 2026',
-    lab: 'General Hospital Radiology',
-    type: 'Imaging',
-    aiSummary: {
-      status: 'Normal',
-      text: 'No active cardiothoracic lesion seen. Lung fields are clear. Heart size is normal.',
-      flags: []
-    }
-  }
-]
-
 export function ReportReviewModule({ timeline }) {
   const data = timeline?.length > 0 
     ? timeline
@@ -58,7 +31,7 @@ export function ReportReviewModule({ timeline }) {
             flags: []
           }
         }))
-    : REPORTS;
+    : [];
 
   const [selectedReportId, setSelectedReportId] = useState(data.length > 0 ? data[0].id : null)
   

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { 
@@ -9,19 +9,12 @@ import {
   Heart, 
   Droplet,
   ChevronRight,
-  ShieldAlert
+  ShieldAlert,
+  Loader2
 } from 'lucide-react'
 import { Card, Button, Input, Badge } from '../../components/ui'
-
-// Mock Data
-const PATIENTS = [
-  { id: 'P-9821', name: 'Michael Chang', age: 45, gender: 'M', bloodGroup: 'O+', lastVisit: '2 days ago', healthScore: 78, tags: ['Hypertension'], avatar: 'MC', risk: 'moderate' },
-  { id: 'P-3422', name: 'Sarah Jenkins', age: 32, gender: 'F', bloodGroup: 'A-', lastVisit: '1 week ago', healthScore: 92, tags: ['Healthy'], avatar: 'SJ', risk: 'low' },
-  { id: 'P-1123', name: 'David Warner', age: 58, gender: 'M', bloodGroup: 'B+', lastVisit: 'Today', healthScore: 45, tags: ['Diabetes', 'Heart Disease'], avatar: 'DW', risk: 'high' },
-  { id: 'P-8834', name: 'Emily Davis', age: 28, gender: 'F', bloodGroup: 'O-', lastVisit: '1 month ago', healthScore: 88, tags: ['Asthma'], avatar: 'ED', risk: 'low' },
-  { id: 'P-4451', name: 'Robert Fox', age: 51, gender: 'M', bloodGroup: 'AB+', lastVisit: '3 days ago', healthScore: 65, tags: ['Obesity'], avatar: 'RF', risk: 'moderate' },
-  { id: 'P-9912', name: 'Jessica Parker', age: 41, gender: 'F', bloodGroup: 'A+', lastVisit: '2 weeks ago', healthScore: 95, tags: ['Healthy'], avatar: 'JP', risk: 'low' },
-]
+import api from '../../services/api'
+import { calculateHealthScore } from '../../utils/formatters'
 
 const CHIPS = ['All', 'High Risk', 'Moderate Risk', 'Low Risk', 'Hypertension', 'Diabetes', 'Asthma']
 
@@ -30,9 +23,48 @@ export function PatientDirectory() {
   const [searchTerm, setSearchTerm] = useState('')
   const [activeFilter, setActiveFilter] = useState('All')
   const [passportId, setPassportId] = useState('')
+  const [patients, setPatients] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        setLoading(true)
+        const response = await api.get('/doctors/patients')
+        
+        // Map the backend response to the UI shape
+        const mappedPatients = (response.data.patients || []).map(p => {
+          const healthScore = p.profile?.health_score || 85;
+          let risk = 'low';
+          if (healthScore < 60) risk = 'high';
+          else if (healthScore < 80) risk = 'moderate';
+          
+          return {
+            id: p.profile?.passport_id || p.uid,
+            uid: p.uid,
+            name: p.name || 'Unknown Patient',
+            age: p.profile?.dob ? new Date().getFullYear() - new Date(p.profile.dob).getFullYear() : '--',
+            gender: p.profile?.gender?.charAt(0) || '-',
+            bloodGroup: p.profile?.blood_group || '--',
+            lastVisit: 'Recently', // TODO: derive from recent records
+            healthScore: healthScore,
+            tags: p.profile?.chronic_conditions || [],
+            avatar: (p.name || 'U').split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase(),
+            risk: risk
+          }
+        })
+        setPatients(mappedPatients)
+      } catch(err) {
+        console.error('Failed to fetch patients', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchPatients()
+  }, [])
 
   // Filter logic
-  const filteredPatients = PATIENTS.filter(p => {
+  const filteredPatients = patients.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.id.toLowerCase().includes(searchTerm.toLowerCase())
     if (!matchesSearch) return false
     
@@ -119,6 +151,12 @@ export function PatientDirectory() {
       </Card>
 
       {/* Results Grid */}
+      {loading ? (
+        <div className="py-20 text-center flex flex-col items-center">
+          <Loader2 className="w-10 h-10 animate-spin text-blue-500 mb-4" />
+          <p className="text-slate-500">Loading your patients...</p>
+        </div>
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <AnimatePresence>
           {filteredPatients.map((patient, i) => (
@@ -196,8 +234,9 @@ export function PatientDirectory() {
           ))}
         </AnimatePresence>
       </div>
+      )}
       
-      {filteredPatients.length === 0 && (
+      {!loading && filteredPatients.length === 0 && (
         <div className="py-20 text-center">
           <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
             <Search className="w-8 h-8 text-slate-400" />

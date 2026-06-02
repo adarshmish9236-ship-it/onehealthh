@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Pill, Plus, Clock, Check, Edit, Trash2, AlertTriangle,
-  Calendar, RefreshCw, ChevronRight
+  Calendar, RefreshCw, ChevronRight, Loader2
 } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { Input, Select } from '../ui/Input'
@@ -11,37 +11,7 @@ import { ProgressBar, EmptyState, Alert } from '../ui/index'
 import { Badge } from '../ui/Badge'
 import { useToast } from '../ui/Toast'
 import { cn } from '../../utils/formatters'
-
-const INITIAL_MEDS = [
-  {
-    id: 'med-001', name: 'Salbutamol 100mcg', dosage: '2 puffs', frequency: 'as_needed',
-    timing: [], start_date: '2026-04-01', end_date: '2026-12-31',
-    instructions: 'Use inhaler as needed for breathing difficulty.',
-    status: 'active', remaining_days: 212, prescribed_by: 'Dr. Arjun Nair',
-    taken_today: true,
-  },
-  {
-    id: 'med-002', name: 'Amlodipine 5mg', dosage: '1 tablet', frequency: 'once',
-    timing: ['09:00'], start_date: '2026-03-01', end_date: '2026-09-01',
-    instructions: 'Take in the morning with water. Do not crush.',
-    status: 'active', remaining_days: 6, prescribed_by: 'Dr. Arjun Nair',
-    taken_today: false,
-  },
-  {
-    id: 'med-003', name: 'Vitamin D3 1000 IU', dosage: '1 capsule', frequency: 'once',
-    timing: ['08:00'], start_date: '2026-05-01', end_date: '2026-08-01',
-    instructions: 'Take with fatty meal for better absorption.',
-    status: 'active', remaining_days: 30, prescribed_by: 'Self',
-    taken_today: true,
-  },
-  {
-    id: 'med-004', name: 'Azithromycin 500mg', dosage: '1 tablet', frequency: 'once',
-    timing: ['08:00'], start_date: '2026-04-10', end_date: '2026-04-15',
-    instructions: 'Complete the full course even if you feel better.',
-    status: 'completed', remaining_days: 0, prescribed_by: 'Dr. Kavya Verma',
-    taken_today: false,
-  },
-]
+import api from '../../services/api'
 
 const FREQ_LABELS = { once: 'Once daily', twice: 'Twice daily', thrice: 'Thrice daily', weekly: 'Weekly', as_needed: 'As needed' }
 
@@ -79,7 +49,7 @@ function MedCard({ med, onMarkTaken, onDelete }) {
             )}
           </div>
           <p className="text-sm text-[var(--color-text-secondary)] mt-0.5">
-            {med.dosage} · {FREQ_LABELS[med.frequency]}
+            {med.dosage} · {FREQ_LABELS[med.frequency] || med.frequency}
           </p>
         </div>
         <div className="flex gap-1.5 flex-shrink-0">
@@ -121,15 +91,24 @@ function AddMedModal({ isOpen, onClose, onAdd }) {
     name: '', dosage: '', frequency: 'once', start_date: '', end_date: '', instructions: ''
   })
   const [loading, setLoading] = useState(false)
+  const toast = useToast()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    await new Promise(r => setTimeout(r, 800))
-    onAdd({ ...form, id: `med-${Date.now()}`, status: 'active', remaining_days: 30, taken_today: false, prescribed_by: 'Self' })
-    setForm({ name: '', dosage: '', frequency: 'once', start_date: '', end_date: '', instructions: '' })
-    setLoading(false)
-    onClose()
+    try {
+      const payload = { ...form, timing: [], refill_alert_days: 7 }
+      const res = await api.post('/medications', payload)
+      // add default fields for UI
+      const newMed = { ...res.data, taken_today: false, remaining_days: 30 }
+      onAdd(newMed)
+      setForm({ name: '', dosage: '', frequency: 'once', start_date: '', end_date: '', instructions: '' })
+      onClose()
+    } catch (err) {
+      toast.error('Error', err.response?.data?.error?.reason || 'Failed to add medication')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -157,19 +136,65 @@ function AddMedModal({ isOpen, onClose, onAdd }) {
 }
 
 export default function Medications() {
-  const [meds, setMeds] = useState(INITIAL_MEDS)
+  const [meds, setMeds] = useState([])
+  const [loading, setLoading] = useState(true)
   const [addOpen, setAddOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('active')
   const toast = useToast()
 
-  const handleMarkTaken = (id) => {
-    setMeds(prev => prev.map(m => m.id === id ? { ...m, taken_today: true } : m))
-    toast.success('Dose Recorded', 'Medication marked as taken for today.')
+  useEffect(() => {
+    const fetchMeds = async () => {
+      try {
+        setLoading(true)
+        const res = await api.get('/medications')
+        
+        const mapped = res.data.map(m => {
+          // Calculate remaining days roughly
+          let rem = 30
+          if (m.end_date) {
+            const diff = new Date(m.end_date) - new Date()
+            rem = Math.max(0, Math.ceil(diff / 86400000))
+          }
+          
+          // Check if taken today (simplified)
+          const todayStr = new Date().toISOString().split('T')[0]
+          const taken = m.adherence_log?.some(l => l.date === todayStr && l.taken)
+          
+          return {
+            ...m,
+            remaining_days: rem,
+            taken_today: taken
+          }
+        })
+        setMeds(mapped)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchMeds()
+  }, [])
+
+  const handleMarkTaken = async (id) => {
+    try {
+      const todayStr = new Date().toISOString().split('T')[0]
+      await api.post(`/medications/${id}/dose`, { date: todayStr, taken: true })
+      setMeds(prev => prev.map(m => m.id === id ? { ...m, taken_today: true } : m))
+      toast.success('Dose Recorded', 'Medication marked as taken for today.')
+    } catch(err) {
+      toast.error('Error', 'Failed to mark dose')
+    }
   }
 
-  const handleDelete = (id) => {
-    setMeds(prev => prev.filter(m => m.id !== id))
-    toast.info('Removed', 'Medication removed from your list.')
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/medications/${id}`)
+      setMeds(prev => prev.filter(m => m.id !== id))
+      toast.info('Removed', 'Medication removed from your list.')
+    } catch(err) {
+      toast.error('Error', 'Failed to delete medication')
+    }
   }
 
   const handleAdd = (med) => {

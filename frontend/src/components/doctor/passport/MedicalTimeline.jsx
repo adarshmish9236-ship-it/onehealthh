@@ -1,72 +1,8 @@
 import React from 'react'
+import { Activity, FileText, Pill, Stethoscope, ChevronRight } from 'lucide-react'
+import { Card, Button, Badge } from '../../../components/ui'
+import { formatDate } from '../../../utils/formatters'
 import { motion } from 'framer-motion'
-import { 
-  Stethoscope, 
-  Pill, 
-  FileText, 
-  Syringe, 
-  Building,
-  ChevronDown
-} from 'lucide-react'
-import { Button } from '../../ui'
-
-const TIMELINE_DATA = [
-  {
-    id: 1,
-    date: '10 May 2026',
-    type: 'Consultation',
-    title: 'General Checkup',
-    doctor: 'Dr. Sarah Smith',
-    desc: 'Patient complained of mild chest pain. Recommended ECG and blood work.',
-    icon: Stethoscope,
-    color: 'bg-blue-500 text-white',
-    ring: 'ring-blue-100 dark:ring-blue-900/30'
-  },
-  {
-    id: 2,
-    date: '12 May 2026',
-    type: 'Report',
-    title: 'ECG & Lipid Profile',
-    doctor: 'City Lab',
-    desc: 'ECG normal. Elevated LDL cholesterol (160 mg/dL).',
-    icon: FileText,
-    color: 'bg-indigo-500 text-white',
-    ring: 'ring-indigo-100 dark:ring-indigo-900/30'
-  },
-  {
-    id: 3,
-    date: '14 May 2026',
-    type: 'Prescription',
-    title: 'Cholesterol Management',
-    doctor: 'Dr. Sarah Smith',
-    desc: 'Prescribed Atorvastatin 20mg daily. Diet modification advised.',
-    icon: Pill,
-    color: 'bg-emerald-500 text-white',
-    ring: 'ring-emerald-100 dark:ring-emerald-900/30'
-  },
-  {
-    id: 4,
-    date: '15 Oct 2025',
-    type: 'Vaccination',
-    title: 'Annual Flu Shot',
-    doctor: 'Nurse Station 4',
-    desc: 'Administered standard tetravalent influenza vaccine.',
-    icon: Syringe,
-    color: 'bg-amber-500 text-white',
-    ring: 'ring-amber-100 dark:ring-amber-900/30'
-  },
-  {
-    id: 5,
-    date: '02 Mar 2024',
-    type: 'Hospital Visit',
-    title: 'Appendectomy',
-    doctor: 'Dr. Robert Jenkins',
-    desc: 'Laparoscopic appendectomy performed. Uncomplicated recovery.',
-    icon: Building,
-    color: 'bg-red-500 text-white',
-    ring: 'ring-red-100 dark:ring-red-900/30'
-  }
-]
 
 export function MedicalTimeline({ timeline }) {
   const data = timeline?.length > 0 
@@ -81,7 +17,17 @@ export function MedicalTimeline({ timeline }) {
         color: item.type === 'record' ? 'bg-blue-500 text-white' : 'bg-emerald-500 text-white',
         ring: item.type === 'record' ? 'ring-blue-100 dark:ring-blue-900/30' : 'ring-emerald-100 dark:ring-emerald-900/30'
       }))
-    : TIMELINE_DATA;
+    : [];
+
+  if (data.length === 0) {
+    return (
+      <div className="p-8 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 text-center flex flex-col items-center">
+        <Activity className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" />
+        <h3 className="font-bold text-slate-700 dark:text-slate-300">No History Available</h3>
+        <p className="text-slate-500 text-sm mt-1 max-w-sm">There are no medical records or medications on file for this patient.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="relative pl-4 sm:pl-0">

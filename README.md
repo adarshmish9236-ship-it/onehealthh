@@ -1,464 +1,126 @@
-# 🏥 OneHealth Digital Passport Platform
+<div align="center">
+  <img src="https://img.icons8.com/color/120/000000/heart-health.png" alt="OneHealth Logo" width="80" />
+  
+  # 🏥 OneHealth: Your Digital Health Passport
+  
+  **A secure, AI-augmented digital health record system built for the modern healthcare ecosystem.**
 
-> **A secure, AI-augmented digital health record system** built for the modern healthcare ecosystem. OneHealth enables patients to own and share their entire medical history, empowers doctors with consent-gated record access, and leverages Google Gemini 1.5 Pro to deliver real-time clinical intelligence.
+  [![Hackathon](https://img.shields.io/badge/Hackverse-2026-blueviolet?style=for-the-badge&logo=hackathon)](https://hackverse.com)
+  [![Gemini API](https://img.shields.io/badge/Gemini%201.5%20Pro-Powered-0082FF?style=for-the-badge&logo=google)](https://aistudio.google.com)
+  [![React](https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
+  [![Flask](https://img.shields.io/badge/Flask-3.x-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+  [![Firebase](https://img.shields.io/badge/Firebase-v12-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
 
----
-
-## Table of Contents
-
-1. [System Overview](#1-system-overview)
-2. [Ecosystem Architecture](#2-ecosystem-architecture)
-3. [Project Directory Tree](#3-project-directory-tree)
-4. [Environment Variables Ledger](#4-environment-variables-ledger)
-5. [Unified API Reference Matrix](#5-unified-api-reference-matrix)
-6. [Bootstrapping Guide](#6-bootstrapping-guide)
-7. [Docker Multi-Container Profile](#7-docker-multi-container-profile)
-8. [Automated Testing Guide](#8-automated-testing-guide)
+</div>
 
 ---
 
-## 1. System Overview
+## 🚀 The Problem & Our Solution
+**The Problem:** Medical records are fragmented across hospitals, clinics, and paper files. Patients lack ownership of their data, and in emergencies, crucial health history is often inaccessible, leading to delayed or incorrect treatments.
 
-OneHealth is a **digital health passport** platform that consolidates fragmented medical records into a single, patient-controlled, cryptographically-secured profile. It supports three actor roles:
-
-| Role | Capabilities |
-|------|-------------|
-| **Patient** | Manage personal health profile; upload/view records; track medications; generate emergency share links; export PDF health reports; AI symptom & risk analysis |
-| **Doctor** | Access consent-gated patient timelines; add diagnoses, prescriptions, and follow-up notes |
-| **Admin** | List and moderate all platform users; verify doctor credentials; view aggregate analytics |
-
-### Core Feature Pillars
-
-- **Identity & Auth** — Firebase Authentication with custom JWT claims for RBAC
-- **Health Records** — Structured Firestore documents + Firebase Storage for file uploads
-- **Medication Tracking** — Full CRUD with adherence logging and APScheduler-driven reminders
-- **AI Engine** — Gemini 1.5 Pro for symptom analysis, report OCR parsing, risk prediction, emergency guidance, and feedback sentiment
-- **Emergency Card** — Shareable, time-limited (24 h) tokenized emergency data card
-- **PDF Export** — ReportLab-generated health summary PDF
+**The Solution:** **OneHealth** is a decentralized, patient-centric digital passport that consolidates medical history into a cryptographically-secured profile. It enables seamless sharing with healthcare professionals while giving patients total control over their data.
 
 ---
 
-## 2. Ecosystem Architecture
+## ✨ Killer Features (Why Judges Will Love This)
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                          CLIENT BROWSER                             │
-│                                                                     │
-│  React 19 + Vite + TailwindCSS + Zustand                           │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  Firebase JS SDK v12                                         │   │
-│  │  • signInWithEmailAndPassword → ID Token (JWT)              │   │
-│  │  • getIdToken() → attached as Authorization: Bearer <JWT>   │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  Axios API Client  (src/services/api.js)                    │   │
-│  │  baseURL: VITE_API_BASE_URL → http://localhost:10000/api/v1 │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-└──────────────────────────┬──────────────────────────────────────────┘
-                           │ HTTPS / JSON
-                           ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                    BACKEND  (Flask 3.x / Gunicorn)                  │
-│                    host: 0.0.0.0  port: 10000                       │
-│                                                                     │
-│  ┌──────────────┐  ┌──────────────────────────────────────────┐    │
-│  │ CORS Layer   │  │ @require_auth decorator                   │    │
-│  │ /api/*       │  │  firebase_admin.auth.verify_id_token(JWT) │    │
-│  │ ALLOWED_ORIGINS│ │  → populates g.user{uid, email, role}    │    │
-│  └──────────────┘  └──────────────────────────────────────────┘    │
-│                                                                     │
-│  Blueprints mounted at /api/v1/*                                    │
-│  /auth  /patients  /records  /medications  /ai                      │
-│  /doctors  /admin  /feedback                                        │
-│                                                                     │
-│  ┌──────────────────┐  ┌─────────────────────────────────────┐     │
-│  │ APScheduler       │  │ Sentry SDK                          │     │
-│  │ • medication      │  │ • Flask integration                 │     │
-│  │   reminders (1m)  │  │ • traces_sample_rate=1.0            │     │
-│  │ • refill alerts   │  └─────────────────────────────────────┘     │
-│  │   (daily 10:00Z)  │                                              │
-│  └──────────────────┘                                              │
-└───────────┬─────────────────────┬───────────────────────────────────┘
-            │                     │
-            ▼                     ▼
-┌───────────────────┐   ┌─────────────────────────────────────────────┐
-│  Firebase Admin   │   │  Google Generative AI (Gemini 1.5 Pro)      │
-│  SDK v6           │   │  • analyze_symptoms                         │
-│  • Firestore      │   │  • analyze_report (OCR via pdfplumber +      │
-│  • Firebase Auth  │   │    pytesseract)                             │
-│  • Cloud Storage  │   │  • risk_prediction                          │
-│  • FCM (push)     │   │  • emergency_guidance                       │
-└───────────────────┘   │  • analyze_feedback                         │
-                        └─────────────────────────────────────────────┘
-```
-
-### Technology Stack Summary
-
-| Layer | Technology | Version |
-|-------|-----------|---------|
-| Frontend Framework | React | 19.x |
-| Build Tool | Vite | 8.x |
-| CSS Framework | TailwindCSS | 4.x |
-| State Management | Zustand | 5.x |
-| HTTP Client | Axios | 1.x |
-| Backend Framework | Flask | 3.x |
-| WSGI Server | Gunicorn | 21.x |
-| Auth Platform | Firebase Admin SDK | 6.x |
-| Database | Cloud Firestore | — |
-| File Storage | Firebase Cloud Storage | — |
-| AI Inference | Google Gemini 1.5 Pro | — |
-| PDF Generation | ReportLab | 4.x |
-| Task Scheduler | APScheduler | 3.x |
-| Error Tracking | Sentry SDK | 1.x |
-| Data Validation | Pydantic | 2.x |
+- **🤖 Gemini-Powered AI Triage & OCR:** Instantly analyze symptoms, predict health risks, and extract structured data from uploaded medical reports using Google Gemini 1.5 Pro.
+- **🛡️ Consent-Gated Doctor Access:** Doctors can only view timelines and add diagnoses/prescriptions if the patient grants active consent. Privacy by design.
+- **🚨 24-Hour Emergency Card:** Generate a time-limited, tokenized emergency share link for first responders to access critical data (blood type, allergies) instantly.
+- **💊 Intelligent Medication Tracking:** Automated adherence logging and APScheduler-driven reminders via FCM Push Notifications.
+- **📄 Instant PDF Health Reports:** Export your complete medical summary into a beautifully formatted ReportLab-generated PDF with one click.
+- **🔐 Enterprise-Grade Security:** Firebase Auth with custom JWT claims (RBAC) and Python decorator-based authorization, ensuring zero data leaks.
 
 ---
 
-## 3. Project Directory Tree
+## 🛠️ Ecosystem Architecture
 
-```
-HealthOne/
-├── .gitignore                        # Root ignore — frontend artifacts, IDE, env files
-├── README.md                         # ← This file
-├── firestore.rules                   # Firestore security rules
-│
-├── backend/
-│   ├── .gitignore                    # Python-specific ignores
-│   ├── .env                          # ⚠️  NEVER commit — local secrets
-│   ├── .env.example                  # Safe template — commit this
-│   ├── app.py                        # Application factory (create_app)
-│   ├── config.py                     # AppConfig class + env validation
-│   ├── requirements.txt              # Pinned Python dependencies
-│   ├── Dockerfile                    # Production container definition
-│   │
-│   ├── middleware/
-│   │   ├── auth.py                   # @require_auth RBAC decorator
-│   │   └── rate_limiter.py           # Redis-backed sliding window limiter
-│   │
-│   ├── models/
-│   │   ├── user.py                   # User, Profile Pydantic schemas
-│   │   ├── record.py                 # HealthRecord schema
-│   │   ├── medication.py             # Medication schema
-│   │   └── feedback.py              # Feedback, FeedbackAnalysis schemas
-│   │
-│   ├── routes/
-│   │   ├── auth.py                   # POST /register, /verify-otp, /set-role
-│   │   ├── patients.py               # Profile, timeline, emergency card, PDF export
-│   │   ├── records.py                # Health record CRUD + file upload
-│   │   ├── medications.py            # Medication CRUD + dose tracking
-│   │   ├── ai.py                     # Gemini inference endpoints
-│   │   ├── doctors.py                # Doctor portal — consent-gated patient access
-│   │   ├── admin.py                  # Admin portal — user list, analytics, doctor verify
-│   │   └── feedback.py              # AI-analysed platform feedback
-│   │
-│   ├── services/
-│   │   ├── firebase_service.py       # Firestore CRUD + Storage upload helpers
-│   │   ├── gemini_service.py         # Gemini 1.5 Pro service wrapper
-│   │   ├── report_parser.py          # PDF/image OCR text extraction
-│   │   ├── medication_service.py     # Medication business logic
-│   │   └── notification_service.py  # FCM push + scheduled reminder checks
-│   │
-│   ├── utils/
-│   │   ├── exceptions.py             # Typed API exception hierarchy
-│   │   └── formatters.py            # Standardised JSON response formatters
-│   │
-│   └── tests/
-│       ├── conftest.py               # Pytest fixtures (app, mock clients)
-│       ├── test_api.py               # Health check & basic smoke tests
-│       ├── test_e2e_journey.py       # Full end-to-end user journey suite
-│       ├── test_firebase_service.py  # Firebase service unit tests
-│       └── test_notification_service.py  # Scheduler / FCM unit tests
-│
-└── frontend/
-    ├── .gitignore                    # Node artifacts, env files
-    ├── index.html                    # Vite entry HTML
-    ├── package.json
-    ├── vite.config.js
-    ├── tailwind.config.js
-    ├── postcss.config.js
-    │
-    └── src/
-        ├── main.jsx                  # React root mount
-        ├── App.jsx                   # Router & layout shell
-        │
-        ├── services/
-        │   ├── api.js                # ★ Axios singleton — baseURL /api/v1 + JWT injector
-        │   ├── firebase.js           # Firebase app initialisation (no mock fallbacks)
-        │   ├── authService.js        # register / login / logout helpers
-        │   ├── aiService.js          # Gemini AI endpoint calls
-        │   ├── medicationService.js  # Medication CRUD wrappers
-        │   └── recordsService.js     # Health record CRUD wrappers
-        │
-        ├── store/                    # Zustand global state slices
-        ├── hooks/                    # Custom React hooks
-        ├── components/               # Reusable UI components
-        ├── pages/                    # Route-level page components
-        ├── styles/                   # Global CSS / design tokens
-        └── utils/                   # Shared utility functions
+```mermaid
+graph TD
+    %% Define Styles
+    classDef client fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff;
+    classDef backend fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff;
+    classDef external fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff;
+
+    %% Nodes
+    A[📱 Client App<br>React 19 + Zustand]:::client
+    B[🔥 Firebase Auth<br>JWT & RBAC]:::external
+    C[⚡ Flask Backend<br>REST API + Rate Limiter]:::backend
+    D[🧠 Gemini 1.5 Pro<br>AI Triage & OCR]:::external
+    E[🗄️ Firestore DB<br>Health Records]:::external
+    F[☁️ Cloud Storage<br>PDFs & Images]:::external
+
+    %% Edges
+    A -- Authenticates --> B
+    A -- API Calls (JWT) --> C
+    C -- Validates Token --> B
+    C -- Inference Requests --> D
+    C -- CRUD Operations --> E
+    C -- Uploads/Downloads --> F
 ```
 
 ---
 
-## 4. Environment Variables Ledger
+## 💻 Tech Stack Summary
 
-### 4.1 Backend (`backend/.env`)
-
-| Variable | Required | Description | How to Obtain |
-|----------|----------|-------------|---------------|
-| `FLASK_ENV` | ✅ | `development` or `production` | Set manually |
-| `SECRET_KEY` | ✅ | Cryptographically random 256-bit string | `python -c "import secrets; print(secrets.token_hex(32))"` |
-| `FIREBASE_CREDENTIALS_JSON` | ✅ | Full Firebase service-account JSON as a single-line string | Firebase Console → Project Settings → Service Accounts → Generate New Private Key → serialize JSON |
-| `FIREBASE_PROJECT_ID` | ✅ | Firebase project ID (e.g. `onehealth-prod`) | Firebase Console → Project Settings |
-| `FIREBASE_STORAGE_BUCKET` | ✅ | Cloud Storage bucket (e.g. `onehealth-prod.appspot.com`) | Firebase Console → Storage → Get Started |
-| `GEMINI_API_KEY` | ✅ | Google AI Studio API key for Gemini 1.5 Pro | [aistudio.google.com](https://aistudio.google.com) → Get API Key |
-| `ALLOWED_ORIGINS` | ✅ | Comma-separated list of frontend origins | e.g. `http://localhost:5173,https://onehealth.vercel.app` |
-| `SENTRY_DSN` | ⬜ | Sentry project DSN for error tracking | [sentry.io](https://sentry.io) → New Project → DSN |
-| `MAX_UPLOAD_SIZE_MB` | ⬜ | Max file upload size in MB (default: `20`) | Set manually |
-
-> **Security Note:** `FIREBASE_CREDENTIALS_JSON` must be serialized as a **single JSON string** on one line, not a file path. Use:
-> ```bash
-> python -c "import json; print(json.dumps(json.load(open('service-account.json'))))"
-> ```
-
-### 4.2 Frontend (`frontend/.env`)
-
-| Variable | Required | Description | How to Obtain |
-|----------|----------|-------------|---------------|
-| `VITE_API_BASE_URL` | ✅ | Backend base URL including `/api/v1` | e.g. `http://localhost:10000/api/v1` or `https://api.onehealth.in/api/v1` |
-| `VITE_FIREBASE_API_KEY` | ✅ | Firebase Web API key | Firebase Console → Project Settings → Your apps → Web app config |
-| `VITE_FIREBASE_AUTH_DOMAIN` | ✅ | Firebase auth domain | Same as above |
-| `VITE_FIREBASE_PROJECT_ID` | ✅ | Firebase project ID | Same as above |
-| `VITE_FIREBASE_STORAGE_BUCKET` | ✅ | Cloud Storage bucket | Same as above |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID` | ✅ | FCM sender ID | Same as above |
-| `VITE_FIREBASE_APP_ID` | ✅ | Firebase app ID | Same as above |
-
-> **Important:** All frontend env vars must be prefixed with `VITE_` to be exposed by Vite. Variables without this prefix are never sent to the browser.
+| Domain | Technologies |
+|---|---|
+| **Frontend App** | React 19, Vite 8, TailwindCSS 4, Zustand, Axios |
+| **Backend API** | Flask 3, Gunicorn, Pydantic, APScheduler |
+| **Database & Auth** | Firebase Admin SDK 6 (Firestore, Cloud Storage, Auth) |
+| **AI Integration** | Google Gemini 1.5 Pro (via Google Generative AI) |
+| **DevOps & Testing** | Docker, Pytest, Sentry SDK, ReportLab |
 
 ---
 
-## 5. Unified API Reference Matrix
+## 🚀 Quick Start (Bootstrapping)
 
-All endpoints are mounted under `/api/v1`. The health check endpoint lives at `/health` (no prefix).
-
-### Health Check
-
-| Verb | Absolute Path | Required Role | Description | Response |
-|------|--------------|---------------|-------------|----------|
-| `GET` | `/health` | Public | Liveness probe | `200 { status, version }` |
-
-### Phase 3 — Authentication (`/api/v1/auth`)
-
-| Verb | Absolute Path | Required Role | Description | Response |
-|------|--------------|---------------|-------------|----------|
-| `POST` | `/api/v1/auth/register` | Public | Create Firebase user + Firestore profile; assign custom role claim | `201 { uid, message }` |
-| `POST` | `/api/v1/auth/verify-otp` | Public | Verify OTP and issue Firebase custom token | `200 { token }` |
-| `POST` | `/api/v1/auth/set-role` | `admin` | Override a user's custom role claim | `200 { message }` |
-
-### Phase 4 — Patients (`/api/v1/patients`)
-
-| Verb | Absolute Path | Required Role | Description | Response |
-|------|--------------|---------------|-------------|----------|
-| `GET` | `/api/v1/patients/profile` | `patient` | Retrieve authenticated patient's profile | `200 Profile` |
-| `PUT` | `/api/v1/patients/profile` | `patient` | Update patient profile fields | `200 Profile` |
-| `GET` | `/api/v1/patients/timeline` | `patient`, `doctor` | Chronological health timeline (records + medications) | `200 { timeline[] }` |
-| `GET` | `/api/v1/patients/emergency-card` | `patient`, `doctor`, `admin` | Critical health snapshot for emergency use | `200 EmergencyCard` |
-| `POST` | `/api/v1/patients/emergency-share` | `patient` | Generate a 24-hour shareable emergency link token | `201 { share_token, expires_at }` |
-| `GET` | `/api/v1/patients/export-report` | `patient` | Stream a ReportLab-generated PDF health summary | `200 application/pdf` |
-
-### Phase 4 — Health Records (`/api/v1/records`)
-
-| Verb | Absolute Path | Required Role | Description | Response |
-|------|--------------|---------------|-------------|----------|
-| `GET` | `/api/v1/records` | `patient`, `doctor` | List all health records for user (doctor requires `?patient_uid=`) | `200 HealthRecord[]` |
-| `POST` | `/api/v1/records` | `patient`, `doctor` | Create a new health record | `201 HealthRecord` |
-| `GET` | `/api/v1/records/<record_id>` | `patient`, `doctor` | Fetch a single health record | `200 HealthRecord` |
-| `PUT` | `/api/v1/records/<record_id>` | `patient`, `doctor` | Update health record fields | `200 HealthRecord` |
-| `DELETE` | `/api/v1/records/<record_id>` | `patient`, `doctor` | Delete a health record | `200 { message }` |
-| `POST` | `/api/v1/records/upload` | `patient`, `doctor` | Upload a medical document to Firebase Storage | `200 { file_url }` |
-
-### Phase 4 — Medications (`/api/v1/medications`)
-
-| Verb | Absolute Path | Required Role | Description | Response |
-|------|--------------|---------------|-------------|----------|
-| `GET` | `/api/v1/medications` | `patient`, `doctor` | List all medications | `200 Medication[]` |
-| `POST` | `/api/v1/medications` | `patient`, `doctor` | Create a medication entry | `201 Medication` |
-| `GET` | `/api/v1/medications/<med_id>` | `patient`, `doctor` | Fetch a single medication | `200 Medication` |
-| `PUT` | `/api/v1/medications/<med_id>` | `patient`, `doctor` | Update medication details | `200 Medication` |
-| `DELETE` | `/api/v1/medications/<med_id>` | `patient`, `doctor` | Delete a medication | `200 { message }` |
-| `POST` | `/api/v1/medications/<med_id>/dose` | `patient` | Mark a dose as taken/skipped for a date | `200 Medication` |
-
-### Phase 5 — AI Engine (`/api/v1/ai`)
-
-| Verb | Absolute Path | Required Role | Description | Response |
-|------|--------------|---------------|-------------|----------|
-| `POST` | `/api/v1/ai/analyze-symptoms` | `patient` | Gemini 1.5 Pro symptom triage and differential analysis | `200 AIAnalysisResult` |
-| `POST` | `/api/v1/ai/analyze-report` | `patient` | OCR + Gemini analysis of an uploaded medical report PDF/image | `200 AIAnalysisResult` |
-| `POST` | `/api/v1/ai/risk-prediction` | `patient` | Predictive health risk scoring based on patient context | `200 RiskPredictionResult` |
-| `POST` | `/api/v1/ai/emergency-guidance` | `patient` | Real-time emergency triage guidance from symptom text | `200 EmergencyGuidanceResult` |
-
-### Phase 6 — Doctor Portal (`/api/v1/doctors`)
-
-| Verb | Absolute Path | Required Role | Description | Response |
-|------|--------------|---------------|-------------|----------|
-| `GET` | `/api/v1/doctors/patients` | `doctor` | List all patients who have granted active consent | `200 { patients[] }` |
-| `GET` | `/api/v1/doctors/patients/<patient_uid>/timeline` | `doctor` | Consent-verified patient timeline | `200 { timeline[] }` |
-| `POST` | `/api/v1/doctors/patients/<patient_uid>/diagnosis` | `doctor` | Add a diagnosis record to patient chart | `201 HealthRecord` |
-| `POST` | `/api/v1/doctors/patients/<patient_uid>/prescription` | `doctor` | Add a prescription medication for patient | `201 Medication` |
-| `POST` | `/api/v1/doctors/patients/<patient_uid>/followup` | `doctor` | Add a follow-up note to patient chart | `201 HealthRecord` |
-
-### Phase 6 — Admin Portal (`/api/v1/admin`)
-
-| Verb | Absolute Path | Required Role | Description | Response |
-|------|--------------|---------------|-------------|----------|
-| `GET` | `/api/v1/admin/users` | `admin` | List all registered platform users with role breakdown | `200 { users[] }` |
-| `PUT` | `/api/v1/admin/doctors/<uid>/verify` | `admin` | Verify a doctor's credentials | `200 { message, doctor_profile }` |
-| `GET` | `/api/v1/admin/analytics` | `admin` | Aggregate platform usage analytics | `200 AnalyticsResult` |
-
-### Phase 8 — Feedback (`/api/v1/feedback`)
-
-| Verb | Absolute Path | Required Role | Description | Response |
-|------|--------------|---------------|-------------|----------|
-| `POST` | `/api/v1/feedback/` | `patient` | Submit feedback; Gemini analyses sentiment + insights; stored in Firestore | `201 FeedbackDocument` |
-
----
-
-## 6. Bootstrapping Guide
-
-### Prerequisites
-
-| Tool | Version | Install |
-|------|---------|---------|
-| Python | ≥ 3.11 | [python.org](https://python.org) |
-| Node.js | ≥ 20 LTS | [nodejs.org](https://nodejs.org) |
-| Git | any | [git-scm.com](https://git-scm.com) |
-| Docker + Compose | ≥ 24 | [docker.com](https://docker.com) (optional) |
-
-### 6.1 Backend Setup
-
+### 1. Clone & Setup Backend
 ```bash
-# 1. Clone the repository
 git clone https://github.com/your-org/onehealth.git
 cd onehealth/HealthOne/backend
 
-# 2. Create and activate a virtual environment
 python -m venv .venv
-# Windows
-.venv\Scripts\activate
-# macOS / Linux
-source .venv/bin/activate
-
-# 3. Install dependencies
+# Windows: .venv\Scripts\activate | Mac/Linux: source .venv/bin/activate
 pip install -r requirements.txt
 
-# 4. Configure environment variables
-cp .env.example .env
-# Edit .env and fill in all required values (see Section 4.1)
-
-# 5. Start the development server
+# Configure your .env based on .env.example
 python app.py
-# Server starts at http://localhost:10000
-
-# 6. Verify liveness
-curl http://localhost:10000/health
-# → {"status": "healthy", "version": "1.0.0"}
 ```
 
-### 6.2 Frontend Setup
-
+### 2. Setup Frontend
 ```bash
 cd ../frontend
-
-# 1. Install Node dependencies
 npm install
 
-# 2. Configure environment variables
-cp .env.example .env
-# Edit .env and fill in all VITE_ values (see Section 4.2)
-
-# 3. Start the Vite dev server
+# Configure your .env based on .env.example
 npm run dev
-# → Local: http://localhost:5173
 ```
 
-> **CORS alignment:** `backend/.env` `ALLOWED_ORIGINS` must include `http://localhost:5173` for local development.
-> `frontend/.env` `VITE_API_BASE_URL` must be `http://localhost:10000/api/v1`.
-
----
-
-## 7. Docker Multi-Container Profile
-
+### 3. Docker Deploy (Optional)
 ```bash
-# From project root (HealthOne/)
 docker compose up --build
-
-# Services started:
-# - backend  → http://localhost:10000
-# - (frontend can be added as a second service)
-
-# Teardown
-docker compose down
 ```
-
-The `backend/Dockerfile` uses Gunicorn as the WSGI entrypoint for production-grade concurrency.
 
 ---
 
-## 8. Automated Testing Guide
-
-### 8.1 Backend Test Suite (pytest)
-
+## 🧪 Testing & CI/CD
+Our backend features comprehensive test coverage spanning unit tests, integration tests, and full E2E journeys.
 ```bash
 cd backend
-
-# Activate virtual environment first (see 6.1 step 2)
-
-# Run the full test suite with coverage report
-pytest tests/ -v --cov=. --cov-report=term-missing --cov-report=html
-
-# Run only the end-to-end journey tests
-pytest tests/test_e2e_journey.py -v
-
-# Run specific test file
-pytest tests/test_firebase_service.py -v
-
-# Run with JUnit XML output (for CI pipelines)
-pytest tests/ --junitxml=junit-report.xml
-```
-
-Coverage HTML report is generated at `backend/htmlcov/index.html`.
-
-### 8.2 Integration Test Notes
-
-The test suite (`tests/conftest.py`) patches Firebase Admin SDK and Gemini services with `pytest-mock` so **no live Firebase project is required** to run tests. Integration tests that hit live endpoints require valid `.env` credentials.
-
-### 8.3 Frontend Linting
-
-```bash
-cd frontend
-
-# ESLint static analysis
-npm run lint
-```
-
-### 8.4 Pre-flight Environment Check
-
-```bash
-cd backend
-
-# Verify all required environment variables are set and valid
-python verify_env.py
+pytest tests/ -v --cov=. --cov-report=term-missing
 ```
 
 ---
 
-## Security Considerations
-
-- **JWT Tokens** are verified server-side on every request via `firebase_admin.auth.verify_id_token()`. The client never sees or stores raw tokens beyond the Firebase SDK session.
-- **RBAC** is enforced at the decorator level (`@require_auth(roles=[...])`). Route handlers trust `g.user['role']` which is populated exclusively from the verified token claims.
-- **ALLOWED_ORIGINS** is parsed from `.env` at startup; `*` is **never** a valid production value.
-- **Service Account keys** must never be committed. Use `FIREBASE_CREDENTIALS_JSON` as a serialized JSON string in the environment.
-- **Rate Limiting** is applied on all auth and write endpoints via a Redis-backed sliding window.
+## 🔒 Security Posture
+- **Stateless Auth:** JWTs are verified server-side on every request. No raw tokens are stored by the client.
+- **Role-Based Access Control (RBAC):** Strict isolation between `patient`, `doctor`, and `admin` roles via custom claims.
+- **Rate Limiting:** Sliding-window rate limiters prevent brute force and API abuse.
+- **Secret Management:** Secrets are injected via environment variables. `firebase_credentials.json` is safely stored.
 
 ---
 
-*Generated for OneHealth Platform v1.0.0 — Hackverse 2026*
+<div align="center">
+  <b>Built with ❤️ for Hackverse 2026</b>
+</div>
