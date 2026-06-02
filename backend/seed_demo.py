@@ -46,7 +46,17 @@ def seed_data():
             "blood_group": "O+",
             "gender": "Male",
             "dob": "1990-01-01",
-            "chronic_conditions": ["Healthy"]
+            "chronic_conditions": ["Healthy"],
+            "allergies": ["Penicillin", "Peanuts"],
+            "chronic_diseases": ["Asthma", "Hypertension"],
+            "current_medications": [
+                { "name": "Salbutamol 100mcg", "dosage": "2 puffs SOS" },
+                { "name": "Amlodipine 5mg", "dosage": "1 tablet daily" }
+            ],
+            "emergency_contacts": [
+                { "name": "Rahul Sharma", "relationship": "Spouse", "phone": "+91 98765 43211" },
+                { "name": "Dr. Arjun", "relationship": "Family Doctor", "phone": "+91 98765 00000" }
+            ]
         }
     }, merge=True)
 
@@ -62,7 +72,16 @@ def seed_data():
             "blood_group": "A-",
             "gender": "Male",
             "dob": "1985-05-12",
-            "chronic_conditions": ["Hypertension"]
+            "chronic_conditions": ["Hypertension"],
+            "allergies": ["Dust Mites"],
+            "chronic_diseases": ["Hypertension"],
+            "current_medications": [
+                { "name": "Lisinopril 10mg", "dosage": "1 tablet daily" },
+                { "name": "Omega-3 Fish Oil 1000mg", "dosage": "1 capsule twice daily" }
+            ],
+            "emergency_contacts": [
+                { "name": "Jane Doe", "relationship": "Spouse", "phone": "+1 555-1234" }
+            ]
         }
     }, merge=True)
 
@@ -78,7 +97,15 @@ def seed_data():
             "blood_group": "B+",
             "gender": "Female",
             "dob": "1993-09-24",
-            "chronic_conditions": ["Asthma"]
+            "chronic_conditions": ["Asthma"],
+            "allergies": ["Dust Mites", "Timothy Grass"],
+            "chronic_diseases": ["Asthma"],
+            "current_medications": [
+                { "name": "Albuterol HFA Inhaler", "dosage": "2 puffs as needed" }
+            ],
+            "emergency_contacts": [
+                { "name": "Mark Miller", "relationship": "Parent", "phone": "+1 555-9876" }
+            ]
         }
     }, merge=True)
 

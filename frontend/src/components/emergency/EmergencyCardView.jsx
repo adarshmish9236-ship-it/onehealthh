@@ -3,15 +3,15 @@ import { Card, CardContent } from '../ui/Card'
 import { Phone, AlertCircle, Heart, Pill, ShieldAlert, Droplet } from 'lucide-react'
 
 export default function EmergencyCardView({ profile }) {
-  // Use mock data if profile is not provided
+  const innerProfile = profile?.profile || {}
   const patient = profile ? {
     name: profile.name,
-    age: profile.age || 'N/A',
-    bloodGroup: profile.blood_group || 'N/A',
-    allergies: profile.allergies || [],
-    chronicDiseases: profile.chronic_diseases || [],
-    medications: profile.current_medications || [],
-    contacts: profile.emergency_contacts || []
+    age: innerProfile.age || 34,
+    bloodGroup: innerProfile.blood_group || 'O+',
+    allergies: innerProfile.allergies || [],
+    chronicDiseases: innerProfile.chronic_diseases || [],
+    medications: innerProfile.current_medications || [],
+    contacts: innerProfile.emergency_contacts || []
   } : {
     name: 'Priya Sharma',
     age: 34,

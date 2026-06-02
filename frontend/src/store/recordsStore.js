@@ -21,7 +21,7 @@ export const useRecordsStore = create((set, get) => ({
     try {
       const q = query(
         collection(db, 'records'),
-        where('userId', '==', uid),
+        where('patient_uid', '==', uid),
         orderBy('date', 'desc')
       )
       const snap = await getDocs(q)
@@ -73,7 +73,7 @@ export const useRecordsStore = create((set, get) => ({
 
   saveRecord: async (uid, recordData) => {
     const id = recordData.id || `rec-${Date.now()}`
-    const payload = { ...recordData, userId: uid, updatedAt: new Date().toISOString() }
+    const payload = { ...recordData, patient_uid: uid, updatedAt: new Date().toISOString() }
     await setDoc(doc(db, 'records', id), payload, { merge: true })
     get().addRecord({ id, ...payload })
     return id

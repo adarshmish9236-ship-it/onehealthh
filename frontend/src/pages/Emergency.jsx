@@ -36,8 +36,8 @@ export default function Emergency() {
             <ShieldCheck size={20} />
           </div>
           <div className="text-left">
-            <p className="text-sm font-bold text-emerald-800">Your details are secure</p>
-            <p className="text-xs text-emerald-600 font-medium">This emergency card is stored locally and is shareable via a secure link.</p>
+            <p className="text-sm font-bold text-emerald-800">What is the Emergency Card?</p>
+            <p className="text-xs text-emerald-600 font-medium">This card provides first responders with your vital health information, allergies, and emergency contacts to ensure you get the right care instantly.</p>
           </div>
         </div>
 
