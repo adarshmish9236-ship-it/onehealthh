@@ -16,8 +16,8 @@ import puppeteer from 'puppeteer';
   console.log("Page loaded. Taking screenshot...");
   await page.screenshot({ path: 'debug.png' });
   
-  const content = await page.content();
-  console.log("Body content snippet:", content.substring(0, 300));
+  const rootContent = await page.evaluate(() => document.getElementById('root')?.innerHTML || 'ROOT NOT FOUND');
+  console.log("Root content snippet:", rootContent.substring(0, 500));
   
   await browser.close();
 })();

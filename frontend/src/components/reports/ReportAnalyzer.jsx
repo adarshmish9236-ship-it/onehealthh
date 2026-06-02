@@ -181,9 +181,9 @@ export default function ReportAnalyzer() {
           <motion.div key="processing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="py-16 space-y-8">
             <div className="flex justify-center">
               <div className="relative w-24 h-24">
-                <div className="absolute inset-0 rounded-full border-4 border-[var(--color-surface-2)]" />
-                <div className="absolute inset-0 rounded-full border-4 border-purple-500 border-t-transparent animate-spin" />
-                <div className="absolute inset-2 rounded-full bg-gradient-to-br from-purple-500 to-[var(--color-primary)] flex items-center justify-center">
+                <div className="absolute inset-0 rounded-lg border-4 border-[var(--color-surface-2)]" />
+                <div className="absolute inset-0 rounded-lg border-4 border-purple-500 border-t-transparent animate-spin" />
+                <div className="absolute inset-2 rounded-lg bg-gradient-to-br from-purple-500 to-[var(--color-primary)] flex items-center justify-center">
                   <Sparkles size={24} className="text-white" />
                 </div>
               </div>
@@ -193,7 +193,7 @@ export default function ReportAnalyzer() {
               <div className="space-y-2">
                 {STEPS.map((s, i) => (
                   <div key={i} className={cn('flex items-center gap-3 text-sm transition-all', i <= currentStep ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-muted)]')}>
-                    <div className={cn('w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0', i < currentStep ? 'bg-emerald-500' : i === currentStep ? 'bg-[var(--color-primary)] animate-pulse' : 'bg-[var(--color-surface-2)]')}>
+                    <div className={cn('w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0', i < currentStep ? 'bg-emerald-500' : i === currentStep ? 'bg-[var(--color-primary)] animate-pulse' : 'bg-[var(--color-surface-2)]')}>
                       {i < currentStep ? <Check size={10} className="text-white" /> : <span className="text-[10px] text-white font-bold">{i + 1}</span>}
                     </div>
                     {s}
@@ -215,7 +215,7 @@ export default function ReportAnalyzer() {
               {result.abnormal_findings?.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-2">
                   {result.abnormal_findings.map((f, i) => (
-                    <span key={i} className="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full">⚠ {f}</span>
+                    <span key={i} className="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg">⚠ {f}</span>
                   ))}
                 </div>
               )}
@@ -243,7 +243,7 @@ export default function ReportAnalyzer() {
                           <td className="px-4 py-3 font-mono font-bold text-[var(--color-text-primary)]">{v.value} {v.unit}</td>
                           <td className="px-4 py-3 text-[var(--color-text-secondary)]">{v.reference_range}</td>
                           <td className="px-4 py-3">
-                            <span className={cn('inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold', s.color)}>
+                            <span className={cn('inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold', s.color)}>
                               {s.icon} {v.status.charAt(0).toUpperCase() + v.status.slice(1)}
                             </span>
                           </td>
@@ -261,7 +261,7 @@ export default function ReportAnalyzer() {
               <ol className="space-y-3">
                 {result.suggested_actions?.map((a, i) => (
                   <li key={i} className="flex gap-3 text-sm text-[var(--color-text-primary)]">
-                    <span className="w-6 h-6 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center flex-shrink-0 font-bold text-xs">{i + 1}</span>
+                    <span className="w-6 h-6 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center flex-shrink-0 font-bold text-xs">{i + 1}</span>
                     {a}
                   </li>
                 ))}

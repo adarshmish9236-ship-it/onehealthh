@@ -210,18 +210,54 @@ export default function Landing() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none overflow-hidden opacity-50">
           <div className="absolute top-[10%] left-[20%] w-[40rem] h-[40rem] bg-primary/10 rounded-3xl blur-[120px] animate-pulse" />
           <div className="absolute bottom-[20%] right-[10%] w-[30rem] h-[30rem] bg-purple-500/10 rounded-3xl blur-[120px]" />
+          
+          {/* DNA Helix Decoration */}
+          <motion.div 
+            animate={{ 
+              y: [0, -20, 0],
+              rotate: [0, 5, 0]
+            }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-[15%] right-[-5%] opacity-20 dark:opacity-10 hidden lg:block"
+          >
+            <svg width="300" height="600" viewBox="0 0 200 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M100 0V600" stroke="currentColor" strokeWidth="0.5" strokeDasharray="4 4" />
+              {[...Array(20)].map((_, i) => (
+                <g key={i}>
+                  <motion.circle 
+                    cx={100 + Math.sin(i * 0.5) * 60} 
+                    cy={i * 30 + 20} 
+                    r="4" 
+                    fill="var(--color-primary)" 
+                    initial={{ opacity: 0.3 }}
+                    animate={{ opacity: [0.3, 1, 0.3], scale: [1, 1.2, 1] }}
+                    transition={{ duration: 3, delay: i * 0.2, repeat: Infinity }}
+                  />
+                  <motion.circle 
+                    cx={100 - Math.sin(i * 0.5) * 60} 
+                    cy={i * 30 + 20} 
+                    r="4" 
+                    fill="#8B5CF6" 
+                    initial={{ opacity: 0.3 }}
+                    animate={{ opacity: [0.3, 1, 0.3], scale: [1, 1.2, 1] }}
+                    transition={{ duration: 3, delay: i * 0.2 + 1.5, repeat: Infinity }}
+                  />
+                  <line 
+                    x1={100 + Math.sin(i * 0.5) * 60} 
+                    y1={i * 30 + 20} 
+                    x2={100 - Math.sin(i * 0.5) * 60} 
+                    y2={i * 30 + 20} 
+                    stroke="currentColor" 
+                    strokeWidth="0.5" 
+                    opacity="0.2" 
+                  />
+                </g>
+              ))}
+            </svg>
+          </motion.div>
         </div>
 
         <div className="w-full max-w-6xl mx-auto text-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-black uppercase tracking-[0.2em] text-primary mb-10"
-          >
-            <Zap size={14} /> Lifelong Health Passport
-          </motion.div>
-
           <motion.h1
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}

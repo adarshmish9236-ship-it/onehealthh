@@ -119,7 +119,7 @@ export default function EmergencyCardView({ profile }) {
                   <div className="font-bold text-dark">{c.name}</div>
                   <div className="text-xs font-semibold uppercase tracking-wider text-gray-500">{c.relationship}</div>
                 </div>
-                <div className="bg-green-100 p-3 rounded-full text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors">
+                <div className="bg-green-100 p-3 rounded-lg text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors">
                   <Phone size={20} />
                 </div>
               </a>

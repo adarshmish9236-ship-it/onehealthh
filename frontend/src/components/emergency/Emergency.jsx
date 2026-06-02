@@ -39,7 +39,7 @@ function ContactButton({ contact, index }) {
         <p className="text-sm text-[var(--color-text-muted)] font-medium uppercase tracking-wide">{contact.relationship}</p>
         <p className="text-sm text-[var(--color-text-secondary)] font-medium mt-0.5">{contact.phone}</p>
       </div>
-      <div className="w-12 h-12 rounded-full bg-green-100 group-hover:bg-green-600 flex items-center justify-center transition-all duration-200">
+      <div className="w-12 h-12 rounded-lg bg-green-100 group-hover:bg-green-600 flex items-center justify-center transition-all duration-200">
         <Phone size={20} className="text-green-600 group-hover:text-white" />
       </div>
     </motion.a>
@@ -129,7 +129,7 @@ function AIGuidancePanel() {
               <ol className="space-y-3">
                 {result.immediate_instructions.map((inst, i) => (
                   <li key={i} className="flex gap-3 text-sm font-medium text-[var(--color-text-primary)]">
-                    <span className="w-7 h-7 rounded-full bg-red-100 text-red-700 flex items-center justify-center flex-shrink-0 font-bold text-xs">
+                    <span className="w-7 h-7 rounded-lg bg-red-100 text-red-700 flex items-center justify-center flex-shrink-0 font-bold text-xs">
                       {i + 1}
                     </span>
                     {inst}
@@ -231,7 +231,7 @@ export default function Emergency() {
             {p?.allergies?.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {p.allergies.map(a => (
-                  <span key={a} className="px-4 py-2 bg-red-100 text-red-900 rounded-full font-bold text-sm border-2 border-red-200">
+                  <span key={a} className="px-4 py-2 bg-red-100 text-red-900 rounded-lg font-bold text-sm border-2 border-red-200">
                     ⚠ {a}
                   </span>
                 ))}
@@ -247,7 +247,7 @@ export default function Emergency() {
               <ul className="space-y-2">
                 {p.chronic_diseases.map(d => (
                   <li key={d} className="flex items-center gap-2 text-base font-semibold text-[var(--color-text-primary)]">
-                    <span className="w-2 h-2 rounded-full bg-orange-500 flex-shrink-0" />
+                    <span className="w-2 h-2 rounded-lg bg-orange-500 flex-shrink-0" />
                     {d}
                   </li>
                 ))}

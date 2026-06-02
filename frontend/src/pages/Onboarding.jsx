@@ -142,7 +142,7 @@ function StepVaccinations({ vaccines, onToggle }) {
             className={cn(
               'flex items-center gap-2 p-3 rounded-xl border text-sm font-medium text-left transition-all',
               vaccines.includes(v)
-                ? 'border-[var(--color-accent)] bg-emerald-50 text-emerald-900'
+                ? 'border-[var(--color-accent)] bg-emerald-50 text-emerald-900 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30'
                 : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-strong)]'
             )}
           >
@@ -158,7 +158,7 @@ function StepVaccinations({ vaccines, onToggle }) {
   )
 }
 
-export default function Onboarding() {
+export function Onboarding() {
   const [currentStep, setCurrentStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
@@ -265,3 +265,6 @@ export default function Onboarding() {
     </div>
   )
 }
+
+export default Onboarding
+

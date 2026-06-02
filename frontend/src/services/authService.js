@@ -1,8 +1,6 @@
 import { 
-  createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
-  signOut, 
-  updateProfile 
+  signOut 
 } from 'firebase/auth'
 import { doc, setDoc, getDoc } from 'firebase/firestore'
 import { auth, db } from './firebase'
@@ -11,20 +9,21 @@ import api from './api'
 export const authService = {
   // Register a new user
   async registerUser(email, password, displayName, role = 'patient', extraData = {}) {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-    const user = userCredential.user
-
-    await updateProfile(user, { displayName })
-
-    // Store additional user profile data in Firestore
-    await setDoc(doc(db, 'users', user.uid), {
-      uid: user.uid,
-      email: user.email,
-      displayName,
-      role, // 'patient' or 'doctor'
-      createdAt: new Date().toISOString(),
-      ...extraData
+    // 1. Call backend API to create user in Firebase Auth and Firestore with correct claims
+    await api.post('/auth/register', {
+      email,
+      password,
+      name: displayName,
+      phone: extraData.phone || undefined, // Backend phone is Optional
+      role
     })
+
+    // 2. Sign in to the Firebase client SDK
+    const userCredential = await signInWithEmailAndPassword(auth, email, password)
+    const user = userCredential.user
+    
+    // 3. Force token refresh to pick up custom claims immediately
+    await user.getIdToken(true)
 
     return user
   },

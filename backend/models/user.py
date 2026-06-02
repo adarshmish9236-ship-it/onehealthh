@@ -18,6 +18,7 @@ class Profile(BaseModel):
     chronic_diseases: List[str] = Field(default_factory=list)
     medical_notes: str = ""
     emergency_contacts: List[EmergencyContact] = Field(default_factory=list)
+    passport_id: Optional[str] = None
 
 class DoctorProfile(BaseModel):
     registration_number: str
@@ -49,3 +50,5 @@ class User(BaseModel):
     profile: Optional[Profile] = None
     doctor_profile: Optional[DoctorProfile] = None
     settings: Optional[Settings] = None
+    passport_id: Optional[str] = None
+

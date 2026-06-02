@@ -1,5 +1,5 @@
-import React, { Suspense, useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, Outlet, useNavigate } from 'react-router-dom'
+import { Suspense, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from './services/firebase'
 import { useAuthStore } from './store/authStore'
@@ -12,7 +12,7 @@ import { Spinner } from './components/ui/index'
 // Pages
 import Landing from './pages/Landing'
 import { Login, Register, OTP } from './pages/Auth'
-import Onboarding from './pages/Onboarding'
+import { Onboarding } from './pages/Onboarding.jsx'
 import Dashboard from './components/dashboard/Dashboard'
 import Passport from './components/passport/Passport'
 import SymptomAnalyzer from './components/symptom/SymptomAnalyzer'
@@ -125,72 +125,70 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text-primary)] font-sans flex flex-col transition-colors duration-300">
-        <AuthWatcher />
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/otp" element={<OTP />} />
-            <Route path="/onboarding" element={<Onboarding />} />
+      <AuthWatcher />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/otp" element={<OTP />} />
+          <Route path="/onboarding" element={<Onboarding />} />
 
-            {/* Doctor Public Routes */}
-            <Route path="/doctor/login" element={<DoctorLogin />} />
-            <Route path="/doctor/register" element={<DoctorRegister />} />
+          {/* Doctor Public Routes */}
+          <Route path="/doctor/login" element={<DoctorLogin />} />
+          <Route path="/doctor/register" element={<DoctorRegister />} />
 
-            {/* Doctor Protected Routes */}
-            <Route path="/doctor" element={<DoctorLayout />}>
-              <Route path="dashboard" element={<DoctorDashboard />} />
-              <Route path="patients" element={<PatientDirectory />} />
-              <Route path="patients/:id" element={<DoctorPatientPassport />} />
-              <Route path="consultation" element={<Navigate to="/doctor/patients" replace />} />
-              <Route path="consultation/:id" element={<ActiveConsultation />} />
-              <Route path="analytics" element={<DoctorAnalytics />} />
-              <Route path="profile" element={<DoctorProfile />} />
-              <Route index element={<Navigate to="/doctor/dashboard" replace />} />
+          {/* Doctor Protected Routes */}
+          <Route path="/doctor" element={<DoctorLayout />}>
+            <Route path="dashboard" element={<DoctorDashboard />} />
+            <Route path="patients" element={<PatientDirectory />} />
+            <Route path="patients/:id" element={<DoctorPatientPassport />} />
+            <Route path="consultation" element={<Navigate to="/doctor/patients" replace />} />
+            <Route path="consultation/:id" element={<ActiveConsultation />} />
+            <Route path="analytics" element={<DoctorAnalytics />} />
+            <Route path="profile" element={<DoctorProfile />} />
+            <Route index element={<Navigate to="/doctor/dashboard" replace />} />
+          </Route>
+
+          {/* Protected patient routes */}
+          <Route element={<PrivateRoute />}>
+            <Route path="/dashboard" element={<AppShell title="Dashboard" subtitle="Your health at a glance" />}>
+              <Route index element={<Dashboard />} />
             </Route>
-
-            {/* Protected patient routes */}
-            <Route element={<PrivateRoute />}>
-              <Route path="/dashboard" element={<AppShell title="Dashboard" subtitle="Your health at a glance" />}>
-                <Route index element={<Dashboard />} />
-              </Route>
-              <Route path="/passport" element={<AppShell title="Health Passport" subtitle="Your complete medical history" />}>
-                <Route index element={<Passport />} />
-              </Route>
-              <Route path="/symptoms" element={<AppShell title="Symptom Analyzer" subtitle="AI-powered health triage" />}>
-                <Route index element={<SymptomAnalyzer />} />
-              </Route>
-              <Route path="/emergency" element={<AppShell title="Emergency Card" subtitle="Critical information for first responders" />}>
-                <Route index element={<Emergency />} />
-              </Route>
-              <Route path="/reports" element={<AppShell title="Report Analyzer" subtitle="AI analysis of your lab reports" />}>
-                <Route index element={<ReportAnalyzer />} />
-              </Route>
-              <Route path="/medications" element={<AppShell title="Medications" subtitle="Track and manage your prescriptions" />}>
-                <Route index element={<Medications />} />
-              </Route>
-              <Route path="/risk" element={<AppShell title="Risk Prediction" subtitle="AI-driven health risk assessment" />}>
-                <Route index element={<Placeholder name="Risk Prediction" />} />
-              </Route>
-              <Route path="/feedback-analytics" element={<AppShell title="Feedback Analytics" subtitle="AI sentiment analysis" />}>
-                <Route index element={<FeedbackAnalytics />} />
-              </Route>
-              <Route path="/health-report" element={<AppShell title="AI Health Report" subtitle="Generate your comprehensive health report" />}>
-                <Route index element={<HealthReportGenerator />} />
-              </Route>
-              <Route path="/settings" element={<AppShell title="Settings" subtitle="Manage your account and preferences" />}>
-                <Route index element={<Placeholder name="Settings" />} />
-              </Route>
+            <Route path="/passport" element={<AppShell title="Health Passport" subtitle="Your complete medical history" />}>
+              <Route index element={<Passport />} />
             </Route>
+            <Route path="/symptoms" element={<AppShell title="Symptom Analyzer" subtitle="AI-powered health triage" />}>
+              <Route index element={<SymptomAnalyzer />} />
+            </Route>
+            <Route path="/emergency" element={<AppShell title="Emergency Card" subtitle="Critical information for first responders" />}>
+              <Route index element={<Emergency />} />
+            </Route>
+            <Route path="/reports" element={<AppShell title="Report Analyzer" subtitle="AI analysis of your lab reports" />}>
+              <Route index element={<ReportAnalyzer />} />
+            </Route>
+            <Route path="/medications" element={<AppShell title="Medications" subtitle="Track and manage your prescriptions" />}>
+              <Route index element={<Medications />} />
+            </Route>
+            <Route path="/risk" element={<AppShell title="Risk Prediction" subtitle="AI-driven health risk assessment" />}>
+              <Route index element={<Placeholder name="Risk Prediction" />} />
+            </Route>
+            <Route path="/feedback-analytics" element={<AppShell title="Feedback Analytics" subtitle="AI sentiment analysis" />}>
+              <Route index element={<FeedbackAnalytics />} />
+            </Route>
+            <Route path="/health-report" element={<AppShell title="AI Health Report" subtitle="Generate your comprehensive health report" />}>
+              <Route index element={<HealthReportGenerator />} />
+            </Route>
+            <Route path="/settings" element={<AppShell title="Settings" subtitle="Manage your account and preferences" />}>
+              <Route index element={<Placeholder name="Settings" />} />
+            </Route>
+          </Route>
 
-            {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
-      </div>
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   )
 }

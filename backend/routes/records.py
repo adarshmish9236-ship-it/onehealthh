@@ -5,7 +5,7 @@ import uuid
 
 from middleware.auth import require_auth
 from middleware.rate_limiter import rate_limit
-from services.firebase_service import FirebaseService
+from services.firebase_service import db, FirebaseService
 from models.record import HealthRecord
 from utils.exceptions import ValidationError, ResourceNotFoundError, FileTooLargeError, FileTypeInvalidError
 
@@ -85,6 +85,37 @@ def delete_record(record_id):
         
     FirebaseService.delete_document("records", record_id)
     return jsonify({"message": "Record deleted successfully"}), 200
+
+@records_bp.route('/fetch-by-id/<report_id>', methods=['GET'])
+@require_auth(roles=['patient'])
+def fetch_report_by_id(report_id):
+    # Simulated external database fetch
+    # In a real app, this might call a hospital API or search a global lab registry
+    
+    # Mock data for demo IDs
+    if report_id == '12345':
+        return jsonify({
+            "id": f"rec-{uuid.uuid4()}",
+            "title": "Comprehensive Blood Profile",
+            "type": "report",
+            "date": "2026-05-15",
+            "metadata": { "doctor_name": "Dr. Ramesh Gupta", "hospital": "Apollo Diagnostics", "notes": "Fetched via External ID" },
+            "ai_analysis": {
+                "summary": "Patient shows normal blood glucose levels, but slight Vitamin D deficiency. Liver function markers are optimal.",
+                "extracted_values": [
+                    { "parameter": "HbA1c", "value": "5.6", "unit": "%", "reference_range": "4.0 - 5.7", "status": "normal" },
+                    { "parameter": "Vitamin D", "value": "22", "unit": "ng/mL", "reference_range": "30 - 100", "status": "low" }
+                ],
+                "suggested_actions": ["Start Vitamin D3 2000IU daily", "Repeat test in 3 months"]
+            }
+        }), 200
+    
+    # Real search for external record ID in our DB
+    record = FirebaseService.get_document("records", report_id)
+    if not record:
+        raise ResourceNotFoundError({"reason": "No report found with this ID number."})
+        
+    return jsonify(record), 200
 
 @records_bp.route('/upload', methods=['POST'])
 @require_auth(roles=['patient', 'doctor'])

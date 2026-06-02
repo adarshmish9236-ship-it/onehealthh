@@ -45,7 +45,7 @@ export function DoctorLayout() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col md:flex-row transition-colors duration-300">
       
       {/* Mobile Header */}
-      <header className="md:hidden flex items-center justify-between p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
+      <header className="md:hidden flex items-center justify-between p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-2 text-blue-600 dark:text-blue-500 font-bold text-xl">
           <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
             <img src="/logo.png" alt="oneHealth logo" className="w-full h-full object-cover" />
@@ -65,7 +65,7 @@ export function DoctorLayout() {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -300, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className={`fixed md:sticky top-0 left-0 h-screen w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col z-40 shadow-xl md:shadow-none
+            className={`fixed md:relative top-0 left-0 h-screen w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col z-40 shadow-xl md:shadow-none
               ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} transition-transform duration-300`}
           >
             {/* Logo area */}
@@ -97,7 +97,7 @@ export function DoctorLayout() {
                     {isActive && (
                       <motion.div
                         layoutId="active-indicator"
-                        className="absolute left-0 top-2 bottom-2 w-1 bg-blue-600 dark:bg-blue-500 rounded-r-full"
+                        className="absolute left-0 top-2 bottom-2 w-1 bg-blue-600 dark:bg-blue-500 rounded-r-lg"
                         initial={false}
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                       />
@@ -115,7 +115,7 @@ export function DoctorLayout() {
                 <img 
                   src={user?.avatar || "https://ui-avatars.com/api/?name=Dr+Smith&background=0D8ABC&color=fff"} 
                   alt="Doctor Avatar" 
-                  className="w-10 h-10 rounded-full border-2 border-white dark:border-slate-800 shadow-sm"
+                  className="w-10 h-10 rounded-xl border-2 border-white dark:border-slate-800 shadow-sm"
                 />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">Dr. {user?.name || "Sarah Smith"}</p>
@@ -135,15 +135,15 @@ export function DoctorLayout() {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative">
+      <main className="flex-1 flex flex-col min-w-0 h-screen relative">
         
         {/* Top Header */}
-        <header className="hidden md:flex h-20 items-center justify-between px-8 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30">
+        <header className="hidden md:flex h-20 items-center justify-between px-8 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{currentTitle}</h1>
             <div className="text-sm text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2">
               <span>oneHealth Pro</span>
-              <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+              <span className="w-1 h-1 rounded-sm bg-slate-300 dark:bg-slate-600"></span>
               <span>{currentTitle}</span>
             </div>
           </div>
@@ -155,20 +155,20 @@ export function DoctorLayout() {
               <input 
                 type="text" 
                 placeholder="Search patient, ID..." 
-                className="pl-10 pr-4 py-2 rounded-full bg-slate-100 dark:bg-slate-800 border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 outline-none text-sm w-64 transition-all"
+                className="pl-10 pr-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 outline-none text-sm w-64 transition-all"
               />
             </div>
 
             {/* Notifications */}
-            <button className="relative p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+            <button className="relative p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
               <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 border-2 border-white dark:border-slate-800 rounded-full"></span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 border-2 border-white dark:border-slate-800 rounded-sm"></span>
             </button>
 
             {/* Theme Toggle */}
             <button 
               onClick={toggleTheme}
-              className="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
             >
               {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>

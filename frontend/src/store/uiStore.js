@@ -14,6 +14,12 @@ export const useUIStore = create(
         set({ theme })
         applyTheme(theme)
       },
+      toggleTheme: () => {
+        const current = get().theme
+        const next = current === 'dark' ? 'light' : 'dark'
+        set({ theme: next })
+        applyTheme(next)
+      },
       toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
       setSidebarCollapsed: (v) => set({ sidebarCollapsed: v }),
       openModal: (id) => set({ activeModal: id }),

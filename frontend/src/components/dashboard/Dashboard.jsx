@@ -19,6 +19,7 @@ import { Button } from '../ui/Button'
 import { RecordTypeBadge } from '../ui/Badge'
 import { formatDate, getRecordTypeLabel, getHealthScoreConfig } from '../../utils/formatters'
 import { medicationService } from '../../services/medicationService'
+import api from '../../services/api'
 
 /* ─── Animated Count-Up ─── */
 function CountUp({ value, duration = 900 }) {
@@ -133,7 +134,7 @@ function CustomTooltip({ active, payload, label }) {
       <p className="text-xs font-medium text-[var(--color-text-muted)] mb-1">{label}</p>
       {payload.map((p, i) => (
         <p key={i} className="text-sm font-bold flex items-center gap-2" style={{ color: p.color }}>
-          <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: p.color }} />
+          <span className="w-2 h-2 rounded-xl inline-block" style={{ backgroundColor: p.color }} />
           {p.name}: {p.value}{p.unit || ''}
         </p>
       ))}
@@ -162,7 +163,7 @@ function FeedbackSection() {
     return (
       <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
         className="rounded-xl border border-emerald-200 bg-emerald-50 dark:bg-emerald-900/20 dark:border-emerald-800 p-6 flex flex-col items-center text-center">
-        <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-800 flex items-center justify-center mb-3">
+        <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-800 flex items-center justify-center mb-3">
           <Check size={24} className="text-emerald-600" />
         </div>
         <h3 className="font-bold text-emerald-900 dark:text-emerald-300">Feedback Submitted!</h3>
@@ -173,7 +174,7 @@ function FeedbackSection() {
 
   return (
     <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 relative overflow-hidden group hover:shadow-md transition-shadow">
-      <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[var(--color-primary)]/5 to-transparent rounded-full -mr-8 -mt-8" />
+      <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[var(--color-primary)]/5 to-transparent rounded-xl -mr-8 -mt-8" />
       <div className="flex items-center gap-2 mb-1">
         <Star size={15} className="text-amber-500" />
         <h3 className="text-sm font-bold text-[var(--color-text-primary)]">Rate your experience</h3>
@@ -517,7 +518,7 @@ export default function Dashboard() {
                         <p className="text-xs font-semibold text-[var(--color-text-primary)]">{med.name} {med.dosage}</p>
                         <p className="text-[10px] text-[var(--color-text-muted)]">{med.frequency || 'As prescribed'}</p>
                       </div>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
                         Active
                       </span>
                     </div>

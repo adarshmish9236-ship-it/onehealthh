@@ -13,10 +13,10 @@ const icons = {
 }
 
 const toastStyles = {
-  success: 'border-emerald-200 bg-emerald-50 text-emerald-900',
-  error:   'border-red-200 bg-red-50 text-red-900',
-  warning: 'border-amber-200 bg-amber-50 text-amber-900',
-  info:    'border-blue-200 bg-blue-50 text-blue-900',
+  success: 'border-emerald-200 bg-emerald-50 text-emerald-900 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/20',
+  error:   'border-red-200 bg-red-50 text-red-900 dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/20',
+  warning: 'border-amber-200 bg-amber-50 text-amber-900 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/20',
+  info:    'border-blue-200 bg-blue-50 text-blue-900 dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/20',
 }
 
 function Toast({ toast }) {

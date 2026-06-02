@@ -98,7 +98,7 @@ function SentimentCard({ result }) {
           <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-2 flex items-center gap-1"><TrendingUp size={10} /> Positive Themes</p>
           <div className="flex flex-wrap gap-1.5">
             {result.positive_themes?.map(t => (
-              <span key={t} className="text-xs px-2 py-1 bg-emerald-100 text-emerald-800 rounded-full font-medium">{t}</span>
+              <span key={t} className="text-xs px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-medium">{t}</span>
             ))}
           </div>
         </div>
@@ -106,7 +106,7 @@ function SentimentCard({ result }) {
           <p className="text-xs font-bold text-red-600 uppercase tracking-wider mb-2 flex items-center gap-1"><TrendingDown size={10} /> Negative Themes</p>
           <div className="flex flex-wrap gap-1.5">
             {result.negative_themes?.map(t => (
-              <span key={t} className="text-xs px-2 py-1 bg-red-100 text-red-800 rounded-full font-medium">{t}</span>
+              <span key={t} className="text-xs px-2 py-1 bg-red-100 text-red-800 rounded-lg font-medium">{t}</span>
             ))}
           </div>
         </div>
@@ -116,7 +116,7 @@ function SentimentCard({ result }) {
         <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2 flex items-center gap-1"><Hash size={10} /> Key Topics</p>
         <div className="flex flex-wrap gap-1.5">
           {result.key_topics?.map(t => (
-            <span key={t} className="text-xs px-2.5 py-1 bg-white/80 border border-[var(--color-border)] text-[var(--color-text-secondary)] rounded-full font-medium">{t}</span>
+            <span key={t} className="text-xs px-2.5 py-1 bg-white/80 border border-[var(--color-border)] text-[var(--color-text-secondary)] rounded-lg font-medium">{t}</span>
           ))}
         </div>
       </div>
@@ -197,7 +197,7 @@ export default function FeedbackAnalytics() {
           <div className="flex justify-center gap-4">
             {PIE_DATA.map(d => (
               <div key={d.name} className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)]">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ background: d.color }} />
+                <div className="w-2.5 h-2.5 rounded-lg" style={{ background: d.color }} />
                 {d.name}
               </div>
             ))}
@@ -231,12 +231,12 @@ export default function FeedbackAnalytics() {
                   <span className="text-[var(--color-text-primary)] font-medium">{c.topic}</span>
                   <span className="text-[var(--color-text-muted)] font-data">{c.count} mentions</span>
                 </div>
-                <div className="h-2 bg-[var(--color-surface-2)] rounded-full overflow-hidden">
+                <div className="h-2 bg-[var(--color-surface-2)] rounded-lg overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${c.pct}%` }}
                     transition={{ duration: 0.8, delay: i * 0.1 }}
-                    className="h-full bg-gradient-to-r from-red-400 to-red-500 rounded-full"
+                    className="h-full bg-gradient-to-r from-red-400 to-red-500 rounded-lg"
                   />
                 </div>
               </div>
@@ -255,12 +255,12 @@ export default function FeedbackAnalytics() {
                   <span className="text-[var(--color-text-primary)] font-medium">{a.topic}</span>
                   <span className="text-[var(--color-text-muted)] font-data">{a.count} mentions</span>
                 </div>
-                <div className="h-2 bg-[var(--color-surface-2)] rounded-full overflow-hidden">
+                <div className="h-2 bg-[var(--color-surface-2)] rounded-lg overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${a.pct}%` }}
                     transition={{ duration: 0.8, delay: i * 0.1 }}
-                    className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full"
+                    className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-lg"
                   />
                 </div>
               </div>
@@ -284,7 +284,7 @@ export default function FeedbackAnalytics() {
               key={t.id}
               onClick={() => setFeedbackType(t.id)}
               className={cn(
-                'px-3 py-1.5 rounded-full text-sm font-medium border transition-all',
+                'px-3 py-1.5 rounded-lg text-sm font-medium border transition-all',
                 feedbackType === t.id
                   ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]'
                   : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-border-strong)]'

@@ -6,14 +6,14 @@ import { ToastContainer } from '../ui/Toast'
 
 export function AppShell({ title, subtitle }) {
   return (
-    <div className="flex h-screen bg-[var(--color-background)] overflow-hidden">
+    <div className="flex min-h-screen bg-[var(--color-background)]">
       {/* Sidebar — desktop only */}
       <Sidebar />
 
       {/* Main content area */}
-      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+      <div className="flex flex-col flex-1 min-w-0">
         <Header title={title} subtitle={subtitle} />
-        <main className="flex-1 overflow-y-auto pb-20 md:pb-0">
+        <main className="flex-1 pb-20 md:pb-0">
           <Outlet />
         </main>
       </div>

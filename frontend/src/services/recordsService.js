@@ -34,6 +34,12 @@ export const recordsService = {
     await deleteDoc(doc(db, 'records', recordId))
   },
 
+  // Fetch record from backend using ID number
+  async fetchById(reportId) {
+    const response = await api.get(`/records/fetch-by-id/${reportId}`)
+    return response.data
+  },
+
   // Example: Backend Flask API Call for parsing complex records
   async parseMedicalReport(fileUrl, fileType) {
     const response = await api.post('/records/parse', { fileUrl, fileType })

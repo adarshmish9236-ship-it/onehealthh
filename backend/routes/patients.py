@@ -191,3 +191,50 @@ def export_report():
         download_name="health_summary.pdf",
         mimetype="application/pdf"
     )
+
+@patients_bp.route('/passport/<passport_id>', methods=['GET'])
+@require_auth(roles=['patient', 'doctor', 'admin'])
+@rate_limit(limit=100, window=60)
+def get_passport_data(passport_id):
+    users = FirebaseService.query_documents("users", "passport_id", "==", passport_id)
+    if not users:
+        raise ResourceNotFoundError({"reason": f"Patient with passport ID {passport_id} not found"})
+    
+    patient = users[0]
+    patient_uid = patient.get("uid")
+    
+    if g.user.get('role') == 'patient' and g.user.get('uid') != patient_uid:
+        raise ResourceNotFoundError({"reason": "Unauthorized to view this passport ID"})
+        
+    records = FirebaseService.query_documents("records", "patient_uid", "==", patient_uid)
+    medications = FirebaseService.query_documents("medications", "patient_uid", "==", patient_uid)
+    
+    timeline = []
+    for r in records:
+        timeline.append({"type": "record", "date": r.get("date"), "data": r})
+    for m in medications:
+        timeline.append({"type": "medication", "date": m.get("start_date"), "data": m})
+        
+    timeline.sort(key=lambda x: x["date"], reverse=True)
+    
+    active_meds = [m for m in medications if m.get("status") == "active"]
+    
+    emergency_card = {
+        "name": patient.get("name"),
+        "blood_group": patient.get("profile", {}).get("blood_group"),
+        "allergies": patient.get("profile", {}).get("allergies", []),
+        "chronic_diseases": patient.get("profile", {}).get("chronic_diseases", []),
+        "emergency_contacts": patient.get("profile", {}).get("emergency_contacts", []),
+        "active_medications": active_meds
+    }
+    
+    return jsonify({
+        "profile": patient.get("profile", {}),
+        "name": patient.get("name"),
+        "email": patient.get("email"),
+        "phone": patient.get("phone"),
+        "passport_id": passport_id,
+        "timeline": timeline,
+        "emergency_card": emergency_card
+    }), 200
+

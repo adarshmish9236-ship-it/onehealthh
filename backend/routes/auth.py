@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 from pydantic import BaseModel, EmailStr, ValidationError as PydanticValidationError
+from typing import Optional
 import firebase_admin.auth
 from utils.exceptions import ValidationError, ResourceNotFoundError, InternalServerError
 from utils.formatters import format_success_response
@@ -14,7 +15,7 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
     name: str
-    phone: str
+    phone: Optional[str] = None
     role: str
 
 class VerifyOtpRequest(BaseModel):
@@ -34,28 +35,47 @@ def register():
         raise ValidationError({'errors': e.errors()})
         
     try:
-        user = firebase_admin.auth.create_user(
-            email=data.email,
-            password=data.password,
-            display_name=data.name,
-            phone_number=data.phone
-        )
+        create_kwargs = {
+            'email': data.email,
+            'password': data.password,
+            'display_name': data.name
+        }
+        if data.phone:
+            create_kwargs['phone_number'] = data.phone
+            
+        user = firebase_admin.auth.create_user(**create_kwargs)
         
         firebase_admin.auth.set_custom_user_claims(user.uid, {'role': data.role})
         
+        import random
+        import string
+        passport_id = None
+        if data.role == 'patient':
+            while True:
+                candidate = f"HP-{''.join(random.choices(string.digits, k=5))}"
+                existing = FirebaseService.query_documents('users', 'passport_id', '==', candidate)
+                if not existing:
+                    passport_id = candidate
+                    break
+
         user_doc = {
             'uid': user.uid,
             'email': data.email,
             'name': data.name,
             'phone': data.phone,
             'role': data.role,
+            'passport_id': passport_id,
             'created_at': datetime.utcnow().isoformat(),
             'updated_at': datetime.utcnow().isoformat()
         }
         
         FirebaseService.create_document('users', user_doc, doc_id=user.uid)
         
-        return format_success_response({'uid': user.uid, 'message': 'User registered successfully'}, 201)
+        return format_success_response({'uid': user.uid, 'passport_id': passport_id, 'message': 'User registered successfully'}, 201)
+    except firebase_admin.auth.EmailAlreadyExistsError:
+        raise ValidationError({'errors': [{'msg': 'An account with this email already exists', 'type': 'auth/email-already-in-use'}]})
+    except firebase_admin.auth.PhoneNumberAlreadyExistsError:
+        raise ValidationError({'errors': [{'msg': 'An account with this phone number already exists', 'type': 'auth/phone-already-in-use'}]})
     except Exception as e:
         raise InternalServerError({'reason': str(e)})
 

@@ -22,7 +22,7 @@ function SymptomChip({ symptom, selected, onToggle }) {
       type="button"
       onClick={() => onToggle(symptom)}
       className={cn(
-        'px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-150',
+        'px-3 py-1.5 rounded-lg text-sm font-medium border transition-all duration-150',
         selected
           ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)] shadow-sm'
           : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]'
@@ -36,10 +36,10 @@ function SymptomChip({ symptom, selected, onToggle }) {
 
 function ResultsView({ result, onReset, onSave }) {
   const cfg = {
-    low:    { gradient: 'from-emerald-500 to-green-600', bg: 'from-emerald-50 to-green-50', border: 'border-emerald-200', text: 'text-emerald-900', icon: '✓' },
-    medium: { gradient: 'from-amber-500 to-orange-500', bg: 'from-amber-50 to-orange-50', border: 'border-amber-200', text: 'text-amber-900', icon: '⚠' },
-    high:   { gradient: 'from-red-500 to-rose-600', bg: 'from-red-50 to-rose-50', border: 'border-red-200', text: 'text-red-900', icon: '🚨' },
-  }[result.severity] || { gradient: 'from-slate-500 to-slate-600', bg: 'from-slate-50 to-slate-50', border: 'border-slate-200', text: 'text-slate-900', icon: '?' }
+    low:    { gradient: 'from-emerald-500 to-green-600', bg: 'from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-emerald-800/20', border: 'border-emerald-200 dark:border-emerald-800/50', text: 'text-emerald-900 dark:text-emerald-300', icon: '✓' },
+    medium: { gradient: 'from-amber-500 to-orange-500', bg: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', border: 'border-amber-200 dark:border-amber-800/50', text: 'text-amber-900 dark:text-amber-300', icon: '⚠' },
+    high:   { gradient: 'from-red-500 to-rose-600', bg: 'from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20', border: 'border-red-200 dark:border-red-800/50', text: 'text-red-900 dark:text-red-300', icon: '🚨' },
+  }[result.severity] || { gradient: 'from-slate-500 to-slate-600', bg: 'from-slate-50 to-slate-50 dark:from-slate-800 dark:to-slate-900', border: 'border-slate-200 dark:border-slate-700', text: 'text-slate-900 dark:text-slate-300', icon: '?' }
 
   return (
     <motion.div
@@ -86,9 +86,9 @@ function ResultsView({ result, onReset, onSave }) {
                 <div className="flex items-start justify-between gap-2">
                   <h4 className="font-semibold text-[var(--color-text-primary)]">{cond.name}</h4>
                   <span className={cn(
-                    'text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0',
-                    cond.confidence === 'high' ? 'bg-emerald-100 text-emerald-700' :
-                    cond.confidence === 'medium' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'
+                    'text-xs font-bold px-2 py-0.5 rounded-lg flex-shrink-0',
+                    cond.confidence === 'high' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' :
+                    cond.confidence === 'medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                   )}>
                     {cond.confidence} confidence
                   </span>
@@ -106,7 +106,7 @@ function ResultsView({ result, onReset, onSave }) {
             <ol className="space-y-2">
               {result.recommendations?.map((rec, i) => (
                 <li key={i} className="flex gap-3 text-sm text-[var(--color-text-primary)]">
-                  <span className="w-6 h-6 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center flex-shrink-0 font-bold text-xs">
+                  <span className="w-6 h-6 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center flex-shrink-0 font-bold text-xs">
                     {i + 1}
                   </span>
                   {rec}
@@ -121,9 +121,9 @@ function ResultsView({ result, onReset, onSave }) {
             </h3>
             <div className="space-y-2">
               {result.otc_suggestions?.map((m, i) => (
-                <div key={i} className="p-3 bg-blue-50 rounded-xl border border-blue-100">
-                  <p className="text-sm font-bold text-blue-900">{m.medicine}</p>
-                  <p className="text-xs text-blue-700">{m.dosage_note}</p>
+                <div key={i} className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800/50">
+                  <p className="text-sm font-bold text-blue-900 dark:text-blue-300">{m.medicine}</p>
+                  <p className="text-xs text-blue-700 dark:text-blue-400/80">{m.dosage_note}</p>
                 </div>
               ))}
             </div>
@@ -252,7 +252,7 @@ export default function SymptomAnalyzer() {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {selectedSymptoms.map(s => (
-                    <span key={s} className="inline-flex items-center gap-1.5 bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1.5 rounded-full text-sm font-medium">
+                    <span key={s} className="inline-flex items-center gap-1.5 bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1.5 rounded-lg text-sm font-medium">
                       {s}
                       <button onClick={() => toggleSymptom(s)} className="hover:text-[var(--color-danger)] transition-colors">
                         <X size={12} />
@@ -284,7 +284,7 @@ export default function SymptomAnalyzer() {
                     key={cat}
                     onClick={() => setActiveCategory(cat)}
                     className={cn(
-                      'px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all',
+                      'px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all',
                       activeCategory === cat
                         ? 'bg-[var(--color-primary)] text-white'
                         : 'bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-strong)]'
@@ -356,9 +356,9 @@ export default function SymptomAnalyzer() {
             className="flex flex-col items-center justify-center py-24 gap-6"
           >
             <div className="relative w-20 h-20">
-              <div className="absolute inset-0 rounded-full border-4 border-[var(--color-surface-2)]" />
-              <div className="absolute inset-0 rounded-full border-4 border-[var(--color-primary)] border-t-transparent animate-spin" />
-              <div className="absolute inset-2 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-purple-600 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-lg border-4 border-[var(--color-surface-2)]" />
+              <div className="absolute inset-0 rounded-lg border-4 border-[var(--color-primary)] border-t-transparent animate-spin" />
+              <div className="absolute inset-2 rounded-lg bg-gradient-to-br from-[var(--color-primary)] to-purple-600 flex items-center justify-center">
                 <Sparkles size={18} className="text-white" />
               </div>
             </div>
