@@ -13,6 +13,7 @@ import { useRecordsStore } from '../../store/recordsStore'
 import { useToast } from '../ui/Toast'
 import { SYMPTOM_CATEGORIES, DURATION_OPTIONS } from '../../utils/constants'
 import { cn } from '../../utils/formatters'
+import { aiService } from '../../services/aiService'
 
 const MOCK_AI_RESULT = {
   severity: 'medium',
@@ -184,10 +185,6 @@ function ResultsView({ result, onReset, onSave }) {
     </motion.div>
   )
 }
-
-import { aiService } from '../../services/aiService'
-
-...
 
 export default function SymptomAnalyzer() {
   const [state, setState] = useState('input') // input | loading | results

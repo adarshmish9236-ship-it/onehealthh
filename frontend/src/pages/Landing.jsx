@@ -270,9 +270,9 @@ export default function Landing() {
           <div className="relative rounded-[3rem] p-2 bg-slate-200/50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/50 shadow-2xl overflow-hidden rotate-x-6">
             <div className="bg-white dark:bg-slate-900 rounded-[calc(3rem-0.5rem)] overflow-hidden aspect-[16/9]">
               <img 
-                src="https://picsum.photos/seed/healthportal/1920/1080?grayscale" 
+                src="/dashboard_mockup.png" 
                 alt="oneHealth Dashboard" 
-                className="w-full h-full object-cover opacity-90 mix-blend-luminosity"
+                className="w-full h-full object-cover opacity-90"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent" />
             </div>
@@ -325,7 +325,7 @@ export default function Landing() {
             <motion.div {...fadeUp()} className="relative">
               <div className="absolute -top-12 -left-12 w-48 h-48 bg-primary/20 rounded-full blur-[80px]" />
               <div className="rounded-[4rem] overflow-hidden shadow-2xl rotate-[-2deg]">
-                <img src="https://picsum.photos/seed/doctorcare/1000/1200?grayscale" alt="Healthcare" className="w-full h-auto grayscale hover:grayscale-0 transition-all duration-1000 scale-105 hover:scale-100" />
+                <img src="/doctor_care.png" alt="Healthcare" className="w-full h-auto hover:scale-105 transition-all duration-1000" />
               </div>
               <div className="absolute bottom-12 right-[-2rem] bg-white dark:bg-slate-900 p-8 rounded-[2rem] shadow-2xl border border-slate-100 dark:border-slate-800 max-w-xs rotate-[3deg]">
                 <div className="flex gap-1 mb-4">

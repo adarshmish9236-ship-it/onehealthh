@@ -10,6 +10,8 @@ import { Alert, ProgressBar } from '../ui/index'
 import { useRecordsStore } from '../../store/recordsStore'
 import { useToast } from '../ui/Toast'
 import { cn } from '../../utils/formatters'
+import { aiService } from '../../services/aiService'
+import { useUserStore } from '../../store/userStore'
 
 const STEPS = ['Uploading', 'Extracting Text', 'Analyzing Values', 'Generating Summary']
 
@@ -47,6 +49,7 @@ export default function ReportAnalyzer() {
   const [progress, setProgress] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
   const [result, setResult] = useState(null)
+  const profile = useUserStore(s => s.profile)
   const addRecord = useRecordsStore(s => s.addRecord)
   const toast = useToast()
 
@@ -59,14 +62,41 @@ export default function ReportAnalyzer() {
   })
 
   const handleAnalyze = async () => {
-    setStep('processing')
-    for (let i = 0; i < STEPS.length; i++) {
-      setCurrentStep(i)
-      setProgress(((i + 1) / STEPS.length) * 100)
-      await new Promise(r => setTimeout(r, 1800))
+    if (!files.length) return
+    try {
+      setStep('processing')
+      setProgress(10)
+      setCurrentStep(0)
+
+      const formData = new FormData()
+      formData.append('file', files[0])
+      formData.append('report_type', reportType)
+      
+      const patient_context = {
+        age: profile?.age,
+        gender: profile?.gender,
+        chronic_diseases: profile?.chronic_diseases || []
+      }
+      formData.append('patient_context', JSON.stringify(patient_context))
+
+      // Simulate steps while waiting for AI
+      const stepInterval = setInterval(() => {
+        setCurrentStep(prev => (prev < STEPS.length - 1 ? prev + 1 : prev))
+        setProgress(prev => (prev < 90 ? prev + 20 : prev))
+      }, 3000)
+
+      const res = await aiService.analyzeReport(formData)
+      
+      clearInterval(stepInterval)
+      setProgress(100)
+      setCurrentStep(STEPS.length - 1)
+      setResult(res)
+      setStep('results')
+    } catch (err) {
+      console.error('Analysis failed:', err)
+      toast.error('Analysis Failed', 'Could not analyze report. Ensure it is a valid medical document.')
+      setStep('upload')
     }
-    setResult(MOCK_ANALYSIS)
-    setStep('results')
   }
 
   const handleSave = () => {

@@ -10,6 +10,8 @@ import { ProgressBar, Alert } from '../ui/index'
 import { useUserStore } from '../../store/userStore'
 import { useToast } from '../ui/Toast'
 import { cn } from '../../utils/formatters'
+import { aiService } from '../../services/aiService'
+import { useRecordsStore } from '../../store/recordsStore'
 
 const SOURCES = [
   { id: 'records',    label: 'Medical Records',   icon: <FileText size={16} />,      desc: '12 records found' },
@@ -29,42 +31,6 @@ const GENERATION_STEPS = [
   'Finalizing report...',
 ]
 
-const MOCK_REPORT = {
-  generated_at: new Date().toISOString(),
-  health_score: 74,
-  patient_status: 'Stable — Minor concerns noted',
-  key_findings: [
-    { severity: 'warning', title: 'Mild Iron-Deficiency Anaemia', detail: 'Haemoglobin at 11.2 g/dL — slightly below normal range. Likely dietary in origin.' },
-    { severity: 'info', title: 'Asthma Well-Controlled', detail: 'No acute episodes in the past 6 months. Current inhaler therapy is effective.' },
-    { severity: 'success', title: 'Cardiovascular Markers Normal', detail: 'Cholesterol, blood pressure readings trending in a healthy direction.' },
-    { severity: 'warning', title: 'Mild Hypertension — Monitor', detail: 'BP readings show borderline values. Lifestyle modifications recommended.' },
-  ],
-  risk_summary: {
-    diabetes:     'Low',
-    hypertension: 'Medium',
-    heart_disease:'Low',
-    obesity:      'Low',
-  },
-  recommendations: [
-    'Increase dietary iron: include spinach, lentils, and fortified cereals daily.',
-    'Take iron supplement (ferrous sulfate 200mg) — consult your doctor for dosage.',
-    'Continue Salbutamol inhaler and carry it at all times.',
-    'Monitor blood pressure twice weekly; log readings in your passport.',
-    'Schedule a follow-up with your cardiologist within 3 months.',
-  ],
-  lifestyle: [
-    '30 minutes of moderate exercise 5 days a week (swimming, cycling, brisk walking).',
-    'Reduce sodium intake to below 1,500 mg/day to support blood pressure control.',
-    'Maintain 7–8 hours of sleep to support immune function and recovery.',
-    'Practice stress management: 10 minutes of mindfulness or breathing exercises daily.',
-  ],
-  followup_plan: [
-    { date: '2026-09-01', action: 'Repeat CBC and Iron Studies' },
-    { date: '2026-09-15', action: 'Cardiologist follow-up for BP monitoring' },
-    { date: '2026-11-01', action: 'Annual general health checkup' },
-  ],
-}
-
 function RiskBadge({ level }) {
   const cfg = {
     Low:    'bg-emerald-100 text-emerald-800',
@@ -73,9 +39,6 @@ function RiskBadge({ level }) {
   }[level] || 'bg-slate-100 text-slate-700'
   return <span className={cn('text-xs font-bold px-2 py-0.5 rounded-full', cfg)}>{level}</span>
 }
-
-import { aiService } from '../../services/aiService'
-import { useRecordsStore } from '../../store/recordsStore'
 
 export default function HealthReportGenerator() {
   const [selectedSources, setSelectedSources] = useState(['records', 'reports', 'medications'])
@@ -282,7 +245,7 @@ export default function HealthReportGenerator() {
                 <AlertTriangle size={18} className="text-amber-500" /> Risk Summary
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {Object.entries(report.risk_summary).map(([condition, level]) => (
+                {report.risk_summary && Object.entries(report.risk_summary).map(([condition, level]) => (
                   <div key={condition} className="p-4 rounded-xl bg-[var(--color-surface-2)] text-center">
                     <RiskBadge level={level} />
                     <p className="text-xs font-medium text-[var(--color-text-secondary)] mt-2 capitalize">
