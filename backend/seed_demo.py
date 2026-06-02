@@ -599,6 +599,54 @@ def seed_data():
         "created_at": firestore.SERVER_TIMESTAMP
     })
 
+    print("Seeding feedback analytics...")
+    feedbacks_to_seed = [
+        {
+            "patient_uid": patient_uid,
+            "text": "The app is very fast and easy to use. I loved the risk prediction feature.",
+            "sentiment": "positive",
+            "insights": {
+                "positive_themes": ["App speed", "Ease of use", "Risk Prediction"],
+                "negative_themes": []
+            },
+            "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
+        },
+        {
+            "patient_uid": patient2_uid,
+            "text": "Consultation was okay, but the video was a bit laggy.",
+            "sentiment": "neutral",
+            "insights": {
+                "positive_themes": [],
+                "negative_themes": ["Video lag"]
+            },
+            "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
+        },
+        {
+            "patient_uid": patient3_uid,
+            "text": "I could not find my prescription history easily. It's confusing.",
+            "sentiment": "negative",
+            "insights": {
+                "positive_themes": [],
+                "negative_themes": ["Confusing UI", "Prescription history difficult to find"]
+            },
+            "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
+        },
+        {
+            "patient_uid": patient_uid,
+            "text": "Really helpful health reports! Great job.",
+            "sentiment": "positive",
+            "insights": {
+                "positive_themes": ["Helpful reports"],
+                "negative_themes": []
+            },
+            "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
+        }
+    ]
+    for f in feedbacks_to_seed:
+        f_ref = db.collection('platform_feedback').document()
+        f["id"] = f_ref.id
+        f_ref.set(f)
+
     print("Seed data injected successfully!")
 
 

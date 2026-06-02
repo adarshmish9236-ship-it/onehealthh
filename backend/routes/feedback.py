@@ -36,3 +36,43 @@ def submit_feedback():
         return jsonify(doc_data), 201
     except PydanticValidationError as e:
         raise ValidationError({"errors": e.errors()})
+
+@feedback_bp.route('/analytics', methods=['GET'])
+@require_auth(roles=['patient', 'doctor', 'admin'])
+def get_analytics():
+    feedbacks = FirebaseService.get_collection("platform_feedback")
+    
+    total = len(feedbacks)
+    if total == 0:
+        return jsonify({
+            "overall_satisfaction": 0,
+            "distribution": {"positive": 0, "neutral": 0, "negative": 0},
+            "top_complaints": [],
+            "top_appreciations": []
+        }), 200
+        
+    distribution = {"positive": 0, "neutral": 0, "negative": 0}
+    for f in feedbacks:
+        dist_key = f.get('sentiment', 'neutral').lower()
+        if dist_key in distribution:
+            distribution[dist_key] += 1
+            
+    overall_satisfaction = int((distribution["positive"] / total) * 100) if total > 0 else 0
+    
+    # Just grab some mock themes from the recent ones
+    complaints = set()
+    appreciations = set()
+    for f in feedbacks:
+        insights = f.get('insights', {})
+        if isinstance(insights, dict):
+            for t in insights.get('negative_themes', []):
+                complaints.add(t)
+            for t in insights.get('positive_themes', []):
+                appreciations.add(t)
+                
+    return jsonify({
+        "overall_satisfaction": overall_satisfaction,
+        "distribution": distribution,
+        "top_complaints": list(complaints)[:3],
+        "top_appreciations": list(appreciations)[:3]
+    }), 200

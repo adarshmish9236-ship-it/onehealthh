@@ -168,7 +168,7 @@ def handle_generate_health_report():
         return format_error(e)
 
 @ai_bp.route('/analyze-feedback', methods=['POST'])
-@require_auth('doctor')
+@require_auth(['doctor', 'patient'])
 def handle_analyze_feedback():
     try:
         data = request.get_json()

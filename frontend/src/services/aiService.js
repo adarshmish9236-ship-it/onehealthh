@@ -144,6 +144,17 @@ export const aiService = {
     // data: { text: string, rating: number }
     const response = await api.post('/feedback/', data)
     return response.data
+  },
+
+  // Get Aggregate Feedback Analytics
+  async getFeedbackAnalytics() {
+    try {
+      const response = await api.get('/feedback/analytics')
+      return response.data
+    } catch (err) {
+      console.error('[aiService] getFeedbackAnalytics error', err)
+      return null
+    }
   }
 }
 

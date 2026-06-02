@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   MessageSquare, Send, Sparkles, ThumbsUp, ThumbsDown,
   Minus, TrendingUp, TrendingDown, Star, BarChart3,
-  Hash, Tag, RefreshCw, Activity
+  Hash, Tag, RefreshCw, Activity, PieChart
 } from 'lucide-react'
+import { useEffect } from 'react'
 import { Button } from '../ui/Button'
 import { Alert, Spinner } from '../ui/index'
 import { Badge } from '../ui/Badge'
@@ -75,7 +76,18 @@ export default function FeedbackAnalytics() {
   const [feedback, setFeedback] = useState('')
   const [feedbackType, setFeedbackType] = useState('consultation')
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState(null)
+  const [stats, setStats] = useState(null)
+  const [statsLoading, setStatsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      setStatsLoading(true)
+      const data = await aiService.getFeedbackAnalytics()
+      if (data) setStats(data)
+      setStatsLoading(false)
+    }
+    fetchStats()
+  }, [])
 
   const handleAnalyze = async () => {
     if (!feedback.trim()) return
@@ -98,40 +110,85 @@ export default function FeedbackAnalytics() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 opacity-50">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 relative overflow-hidden">
+          {statsLoading && <div className="absolute inset-0 bg-white/50 dark:bg-black/50 z-10 flex items-center justify-center"><Spinner size="sm" /></div>}
           <h3 className="font-bold text-[var(--color-text-primary)] mb-4">Overall Satisfaction</h3>
           <div className="flex flex-col items-center justify-center h-48">
-            <span className="text-4xl font-black text-[var(--color-text-primary)] font-data">--</span>
-            <span className="text-xs font-semibold text-emerald-600">out of 100</span>
+            <span className="text-5xl font-black text-[var(--color-text-primary)] font-data">
+              {stats ? stats.overall_satisfaction : '--'}
+            </span>
+            <span className="text-sm font-semibold text-emerald-600 mt-2">out of 100</span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 flex flex-col items-center justify-center h-[268px]">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 flex flex-col items-center relative h-[268px]">
+          {statsLoading && <div className="absolute inset-0 bg-white/50 dark:bg-black/50 z-10 flex items-center justify-center"><Spinner size="sm" /></div>}
           <h3 className="font-bold text-[var(--color-text-primary)] mb-4 w-full text-left">Sentiment Distribution</h3>
-          <Activity className="w-10 h-10 text-slate-300 dark:text-slate-600 mb-2" />
-          <p className="text-slate-500 font-medium">No sentiment data yet</p>
+          {stats ? (
+            <div className="w-full flex-1 flex flex-col justify-center gap-4">
+              <div className="flex justify-between items-center bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg border border-emerald-100 dark:border-emerald-800">
+                <span className="font-medium text-emerald-700 dark:text-emerald-400">Positive</span>
+                <span className="font-bold font-data text-emerald-800 dark:text-emerald-300">{stats.distribution.positive}</span>
+              </div>
+              <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                <span className="font-medium text-slate-700 dark:text-slate-400">Neutral</span>
+                <span className="font-bold font-data text-slate-800 dark:text-slate-300">{stats.distribution.neutral}</span>
+              </div>
+              <div className="flex justify-between items-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-100 dark:border-red-800">
+                <span className="font-medium text-red-700 dark:text-red-400">Negative</span>
+                <span className="font-bold font-data text-red-800 dark:text-red-300">{stats.distribution.negative}</span>
+              </div>
+            </div>
+          ) : (
+            <>
+              <Activity className="w-10 h-10 text-slate-300 dark:text-slate-600 mb-2 mt-auto" />
+              <p className="text-slate-500 font-medium mb-auto">No sentiment data yet</p>
+            </>
+          )}
         </div>
 
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 flex flex-col items-center justify-center h-[268px]">
           <h3 className="font-bold text-[var(--color-text-primary)] mb-4 w-full text-left">Sentiment Trend</h3>
           <BarChart3 className="w-10 h-10 text-slate-300 dark:text-slate-600 mb-2" />
-          <p className="text-slate-500 font-medium">No trend data yet</p>
+          <p className="text-slate-500 font-medium text-center">Trend chart requires more historical data</p>
         </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 flex flex-col items-center justify-center h-[200px]">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 flex flex-col items-center relative min-h-[200px]">
+          {statsLoading && <div className="absolute inset-0 bg-white/50 dark:bg-black/50 z-10 flex items-center justify-center"><Spinner size="sm" /></div>}
           <h3 className="font-bold text-lg text-[var(--color-text-primary)] mb-4 flex items-center gap-2 w-full text-left">
             <TrendingDown size={18} className="text-red-500" /> Top Complaints
           </h3>
-          <p className="text-slate-500 font-medium">No data available</p>
+          {stats?.top_complaints?.length > 0 ? (
+            <ul className="w-full space-y-3">
+              {stats.top_complaints.map((c, i) => (
+                <li key={i} className="bg-red-50 dark:bg-red-900/10 text-red-800 dark:text-red-300 px-4 py-3 rounded-xl border border-red-100 dark:border-red-800/50 text-sm font-medium">
+                  {c}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-slate-500 font-medium my-auto">No complaints recorded</p>
+          )}
         </div>
 
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 flex flex-col items-center justify-center h-[200px]">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 flex flex-col items-center relative min-h-[200px]">
+          {statsLoading && <div className="absolute inset-0 bg-white/50 dark:bg-black/50 z-10 flex items-center justify-center"><Spinner size="sm" /></div>}
           <h3 className="font-bold text-lg text-[var(--color-text-primary)] mb-4 flex items-center gap-2 w-full text-left">
             <TrendingUp size={18} className="text-emerald-500" /> Top Appreciations
           </h3>
-          <p className="text-slate-500 font-medium">No data available</p>
+          {stats?.top_appreciations?.length > 0 ? (
+            <ul className="w-full space-y-3">
+              {stats.top_appreciations.map((a, i) => (
+                <li key={i} className="bg-emerald-50 dark:bg-emerald-900/10 text-emerald-800 dark:text-emerald-300 px-4 py-3 rounded-xl border border-emerald-100 dark:border-emerald-800/50 text-sm font-medium">
+                  {a}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-slate-500 font-medium my-auto">No appreciations recorded</p>
+          )}
         </div>
       </div>
 

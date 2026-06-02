@@ -21,6 +21,7 @@ import ReportAnalyzer from './components/reports/ReportAnalyzer'
 import Medications from './components/medications/Medications'
 import FeedbackAnalytics from './components/dashboard/FeedbackAnalytics'
 import HealthReportGenerator from './components/dashboard/HealthReportGenerator'
+import RiskPrediction from './components/dashboard/RiskPrediction'
 
 // Doctor Portal
 import { DoctorLayout } from './components/doctor/layout/DoctorLayout'
@@ -173,7 +174,7 @@ export default function App() {
               <Route index element={<Medications />} />
             </Route>
             <Route path="/risk" element={<AppShell title="Risk Prediction" subtitle="AI-driven health risk assessment" />}>
-              <Route index element={<Placeholder name="Risk Prediction" />} />
+              <Route index element={<RiskPrediction />} />
             </Route>
             <Route path="/feedback-analytics" element={<AppShell title="Feedback Analytics" subtitle="AI sentiment analysis" />}>
               <Route index element={<FeedbackAnalytics />} />
