@@ -14,7 +14,6 @@ import {
 } from 'lucide-react'
 import { Card, Button, Input, Badge } from '../../components/ui'
 import api from '../../services/api'
-import { calculateHealthScore } from '../../utils/formatters'
 
 const CHIPS = ['All', 'High Risk', 'Moderate Risk', 'Low Risk', 'Hypertension', 'Diabetes', 'Asthma']
 

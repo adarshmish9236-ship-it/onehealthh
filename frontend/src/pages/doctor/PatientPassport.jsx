@@ -11,7 +11,8 @@ import {
   Calendar,
   Syringe,
   Building,
-  Loader2
+  Loader2,
+  Search
 } from 'lucide-react'
 import { Card, Button, Badge } from '../../components/ui'
 import { MedicalTimeline } from '../../components/doctor/passport/MedicalTimeline'
@@ -190,9 +191,19 @@ export function PatientPassport() {
         {/* Left Column: Timeline */}
         <div className="lg:col-span-2 space-y-6">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-blue-600" /> Medical Timeline
-            </h3>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-blue-600" /> Medical Timeline
+              </h3>
+              <div className="relative w-full sm:w-64">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input 
+                  type="text" 
+                  placeholder="Search patient records..." 
+                  className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white placeholder:text-slate-400"
+                />
+              </div>
+            </div>
             <Card className="p-6 border-0 shadow-sm bg-white dark:bg-slate-900">
               <MedicalTimeline timeline={timeline} />
             </Card>

@@ -3,66 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   MessageSquare, Send, Sparkles, ThumbsUp, ThumbsDown,
   Minus, TrendingUp, TrendingDown, Star, BarChart3,
-  Hash, Tag, RefreshCw
+  Hash, Tag, RefreshCw, Activity
 } from 'lucide-react'
-import {
-  PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
-  LineChart, Line, XAxis, YAxis, CartesianGrid, AreaChart, Area,
-  RadialBarChart, RadialBar, Legend
-} from 'recharts'
 import { Button } from '../ui/Button'
 import { Alert, Spinner } from '../ui/index'
 import { Badge } from '../ui/Badge'
 import { cn } from '../../utils/formatters'
 import { aiService } from '../../services/aiService'
-
-const OVERALL_STATS = {
-  satisfaction: 82,
-  positive: 68,
-  negative: 12,
-  neutral: 20,
-}
-
-const SENTIMENT_TREND = [
-  { month: 'Jan', positive: 72, negative: 14, neutral: 14 },
-  { month: 'Feb', positive: 68, negative: 18, neutral: 14 },
-  { month: 'Mar', positive: 75, negative: 10, neutral: 15 },
-  { month: 'Apr', positive: 80, negative: 8,  neutral: 12 },
-  { month: 'May', positive: 65, negative: 20, neutral: 15 },
-  { month: 'Jun', positive: 82, negative: 7,  neutral: 11 },
-]
-
-const TOP_COMPLAINTS = [
-  { topic: 'Long wait times',       count: 34, pct: 41 },
-  { topic: 'Prescription clarity',  count: 22, pct: 26 },
-  { topic: 'Follow-up scheduling',  count: 18, pct: 22 },
-  { topic: 'Billing transparency',  count: 9,  pct: 11 },
-]
-
-const TOP_APPRECIATIONS = [
-  { topic: 'Doctor attentiveness',   count: 58, pct: 35 },
-  { topic: 'Clear explanations',     count: 47, pct: 28 },
-  { topic: 'Fast AI analysis',       count: 39, pct: 24 },
-  { topic: 'Easy-to-use interface',  count: 21, pct: 13 },
-]
-
-const PIE_DATA = [
-  { name: 'Positive', value: OVERALL_STATS.positive, color: '#0E9F6E' },
-  { name: 'Neutral',  value: OVERALL_STATS.neutral,  color: '#64748b' },
-  { name: 'Negative', value: OVERALL_STATS.negative, color: '#E02424' },
-]
-
-const CustomTooltip = ({ active, payload, label }) => {
-  if (!active || !payload?.length) return null
-  return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-3 shadow-lg text-sm">
-      <p className="font-semibold text-[var(--color-text-primary)] mb-1">{label}</p>
-      {payload.map((p, i) => (
-        <p key={i} style={{ color: p.color }} className="font-medium">{p.name}: {p.value}%</p>
-      ))}
-    </div>
-  )
-}
 
 function SentimentCard({ result }) {
   const cfg = {
@@ -151,121 +98,40 @@ export default function FeedbackAnalytics() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 opacity-50">
           <h3 className="font-bold text-[var(--color-text-primary)] mb-4">Overall Satisfaction</h3>
-          <div className="flex flex-col items-center">
-            <div className="relative w-36 h-36">
-              <svg className="w-full h-full -rotate-90" viewBox="0 0 140 140">
-                <circle cx="70" cy="70" r="54" fill="none" strokeWidth="14" stroke="var(--color-surface-2)" />
-                <motion.circle
-                  cx="70" cy="70" r="54" fill="none" strokeWidth="14"
-                  stroke="#0E9F6E" strokeLinecap="round"
-                  strokeDasharray={2 * Math.PI * 54}
-                  initial={{ strokeDashoffset: 2 * Math.PI * 54 }}
-                  animate={{ strokeDashoffset: 2 * Math.PI * 54 * (1 - OVERALL_STATS.satisfaction / 100) }}
-                  transition={{ duration: 1.5, ease: 'easeOut' }}
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-4xl font-black text-[var(--color-text-primary)] font-data">{OVERALL_STATS.satisfaction}</span>
-                <span className="text-xs font-semibold text-emerald-600">out of 100</span>
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-3 w-full mt-4">
-              {PIE_DATA.map(d => (
-                <div key={d.name} className="text-center">
-                  <p className="text-xl font-black font-data" style={{ color: d.color }}>{d.value}%</p>
-                  <p className="text-xs text-[var(--color-text-muted)]">{d.name}</p>
-                </div>
-              ))}
-            </div>
+          <div className="flex flex-col items-center justify-center h-48">
+            <span className="text-4xl font-black text-[var(--color-text-primary)] font-data">--</span>
+            <span className="text-xs font-semibold text-emerald-600">out of 100</span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-          <h3 className="font-bold text-[var(--color-text-primary)] mb-4">Sentiment Distribution</h3>
-          <ResponsiveContainer width="100%" height={180}>
-            <PieChart>
-              <Pie data={PIE_DATA} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="value">
-                {PIE_DATA.map((entry, i) => (
-                  <Cell key={i} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(v) => `${v}%`} />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="flex justify-center gap-4">
-            {PIE_DATA.map(d => (
-              <div key={d.name} className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)]">
-                <div className="w-2.5 h-2.5 rounded-lg" style={{ background: d.color }} />
-                {d.name}
-              </div>
-            ))}
-          </div>
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 flex flex-col items-center justify-center h-[268px]">
+          <h3 className="font-bold text-[var(--color-text-primary)] mb-4 w-full text-left">Sentiment Distribution</h3>
+          <Activity className="w-10 h-10 text-slate-300 dark:text-slate-600 mb-2" />
+          <p className="text-slate-500 font-medium">No sentiment data yet</p>
         </div>
 
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-          <h3 className="font-bold text-[var(--color-text-primary)] mb-4">Sentiment Trend</h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={SENTIMENT_TREND}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-              <XAxis dataKey="month" tick={{ fontSize: 10, fill: 'var(--color-text-muted)' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: 'var(--color-text-muted)' }} axisLine={false} tickLine={false} />
-              <Tooltip content={<CustomTooltip />} />
-              <Line type="monotone" dataKey="positive" name="Positive" stroke="#0E9F6E" strokeWidth={2.5} dot={false} />
-              <Line type="monotone" dataKey="negative" name="Negative" stroke="#E02424" strokeWidth={2.5} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 flex flex-col items-center justify-center h-[268px]">
+          <h3 className="font-bold text-[var(--color-text-primary)] mb-4 w-full text-left">Sentiment Trend</h3>
+          <BarChart3 className="w-10 h-10 text-slate-300 dark:text-slate-600 mb-2" />
+          <p className="text-slate-500 font-medium">No trend data yet</p>
         </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-          <h3 className="font-bold text-lg text-[var(--color-text-primary)] mb-4 flex items-center gap-2">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 flex flex-col items-center justify-center h-[200px]">
+          <h3 className="font-bold text-lg text-[var(--color-text-primary)] mb-4 flex items-center gap-2 w-full text-left">
             <TrendingDown size={18} className="text-red-500" /> Top Complaints
           </h3>
-          <div className="space-y-3">
-            {TOP_COMPLAINTS.map((c, i) => (
-              <div key={i}>
-                <div className="flex justify-between items-center text-sm mb-1">
-                  <span className="text-[var(--color-text-primary)] font-medium">{c.topic}</span>
-                  <span className="text-[var(--color-text-muted)] font-data">{c.count} mentions</span>
-                </div>
-                <div className="h-2 bg-[var(--color-surface-2)] rounded-lg overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${c.pct}%` }}
-                    transition={{ duration: 0.8, delay: i * 0.1 }}
-                    className="h-full bg-gradient-to-r from-red-400 to-red-500 rounded-lg"
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+          <p className="text-slate-500 font-medium">No data available</p>
         </div>
 
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-          <h3 className="font-bold text-lg text-[var(--color-text-primary)] mb-4 flex items-center gap-2">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 flex flex-col items-center justify-center h-[200px]">
+          <h3 className="font-bold text-lg text-[var(--color-text-primary)] mb-4 flex items-center gap-2 w-full text-left">
             <TrendingUp size={18} className="text-emerald-500" /> Top Appreciations
           </h3>
-          <div className="space-y-3">
-            {TOP_APPRECIATIONS.map((a, i) => (
-              <div key={i}>
-                <div className="flex justify-between items-center text-sm mb-1">
-                  <span className="text-[var(--color-text-primary)] font-medium">{a.topic}</span>
-                  <span className="text-[var(--color-text-muted)] font-data">{a.count} mentions</span>
-                </div>
-                <div className="h-2 bg-[var(--color-surface-2)] rounded-lg overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${a.pct}%` }}
-                    transition={{ duration: 0.8, delay: i * 0.1 }}
-                    className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-lg"
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+          <p className="text-slate-500 font-medium">No data available</p>
         </div>
       </div>
 
