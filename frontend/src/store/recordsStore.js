@@ -38,19 +38,43 @@ export const useRecordsStore = create((set, get) => ({
 
           if (param?.includes('haemoglobin') || param?.includes('hemoglobin')) {
             if (!trends.haemoglobin) trends.haemoglobin = []
-            trends.haemoglobin.push({ date, value: parseFloat(v.value) || 0 })
+            trends.haemoglobin.push({
+              date,
+              value: parseFloat(v.value) || 0,
+              unit: v.unit || 'g/dL',
+              refRange: v.reference_range || '12.0 - 16.0',
+              status: v.status || 'normal'
+            })
           }
           if (param?.includes('weight')) {
             if (!trends.weight) trends.weight = []
-            trends.weight.push({ date, value: parseFloat(v.value) || 0 })
+            trends.weight.push({
+              date,
+              value: parseFloat(v.value) || 0,
+              unit: v.unit || 'kg',
+              refRange: v.reference_range || '',
+              status: v.status || 'normal'
+            })
           }
           if (param?.includes('fasting') || param?.includes('glucose')) {
             if (!trends.bloodSugar) trends.bloodSugar = []
-            trends.bloodSugar.push({ date, fasting: parseFloat(v.value) || 0 })
+            trends.bloodSugar.push({
+              date,
+              fasting: parseFloat(v.value) || 0,
+              unit: v.unit || 'mg/dL',
+              refRange: v.reference_range || '70 - 100',
+              status: v.status || 'normal'
+            })
           }
           if (param?.includes('total cholesterol')) {
             if (!trends.cholesterol) trends.cholesterol = []
-            trends.cholesterol.push({ date, total: parseFloat(v.value) || 0 })
+            trends.cholesterol.push({
+              date,
+              total: parseFloat(v.value) || 0,
+              unit: v.unit || 'mg/dL',
+              refRange: v.reference_range || '125 - 200',
+              status: v.status || 'normal'
+            })
           }
         })
       })

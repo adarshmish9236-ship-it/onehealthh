@@ -483,6 +483,31 @@ export default function Dashboard() {
                   </button>
                 </div>
               )}
+
+              {/* ── Stats bar below chart ── */}
+              {trendChartData.length > 0 && (
+                <div className="grid grid-cols-3 divide-x divide-[var(--color-border)] border-t border-[var(--color-border)] mt-4 pt-4">
+                  <div className="px-2">
+                    <p className="text-[10px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-0.5">Current</p>
+                    <p className="text-sm font-extrabold text-[var(--color-text-primary)]">
+                      {trendChartData[trendChartData.length - 1]?.[tc.key] ?? '—'}
+                      <span className="text-xs font-normal text-[var(--color-text-muted)] ml-1">{trendChartData[trendChartData.length - 1]?.unit || tc.unit}</span>
+                    </p>
+                  </div>
+                  <div className="px-2">
+                    <p className="text-[10px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-0.5">Normal Range</p>
+                    <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                      {trendChartData[trendChartData.length - 1]?.refRange || 'Not specified'}
+                    </p>
+                  </div>
+                  <div className="px-2">
+                    <p className="text-[10px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-0.5">Last Tested</p>
+                    <p className="text-sm font-bold text-[var(--color-text-primary)]">
+                      {trendChartData[trendChartData.length - 1]?.date ?? '—'}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
 
