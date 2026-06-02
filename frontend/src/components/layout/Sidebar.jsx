@@ -36,7 +36,7 @@ function NavItem({ item, collapsed }) {
       to={item.path}
       end={item.path === '/dashboard'}
       className={({ isActive }) => cn(
-        'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group relative',
+        'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group relative cursor-pointer',
         isActive
           ? 'bg-[var(--color-primary)] text-white shadow-sm'
           : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text-primary)]',
@@ -80,8 +80,8 @@ export function Sidebar() {
     >
       {/* Logo */}
       <div className={cn('flex items-center gap-3 p-4 border-b border-[var(--color-border)] h-16', collapsed && 'justify-center')}>
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-primary)] to-purple-600 flex items-center justify-center flex-shrink-0">
-          <HeartPulse size={18} className="text-white" />
+        <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center shadow-sm">
+          <img src="/logo.png" alt="oneHealth logo" className="w-full h-full object-cover" />
         </div>
         <AnimatePresence>
           {!collapsed && (
@@ -136,7 +136,7 @@ export function Sidebar() {
       {/* Collapse Toggle */}
       <button
         onClick={toggleSidebar}
-        className="m-3 p-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors flex items-center justify-center"
+        className="m-3 p-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors flex items-center justify-center cursor-pointer hover:bg-[var(--color-border)]"
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       >
         {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}

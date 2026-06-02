@@ -185,6 +185,10 @@ function ResultsView({ result, onReset, onSave }) {
   )
 }
 
+import { aiService } from '../../services/aiService'
+
+...
+
 export default function SymptomAnalyzer() {
   const [state, setState] = useState('input') // input | loading | results
   const [selectedSymptoms, setSelectedSymptoms] = useState([])
@@ -192,6 +196,7 @@ export default function SymptomAnalyzer() {
   const [duration, setDuration] = useState('')
   const [result, setResult] = useState(null)
   const [activeCategory, setActiveCategory] = useState('General')
+  const profile = useUserStore(s => s.profile)
   const addRecord = useRecordsStore(s => s.addRecord)
   const toast = useToast()
 
@@ -210,10 +215,31 @@ export default function SymptomAnalyzer() {
   }
 
   const handleAnalyze = async () => {
-    setState('loading')
-    await new Promise(r => setTimeout(r, 2500))
-    setResult(MOCK_AI_RESULT)
-    setState('results')
+    try {
+      setState('loading')
+      
+      const patient_context = {
+        age: profile?.age,
+        gender: profile?.gender,
+        blood_group: profile?.blood_group,
+        allergies: profile?.allergies || [],
+        chronic_diseases: profile?.chronic_diseases || [],
+        current_medications: profile?.current_medications || []
+      }
+
+      const res = await aiService.analyzeSymptoms({
+        symptoms: selectedSymptoms,
+        duration,
+        patient_context
+      })
+
+      setResult(res)
+      setState('results')
+    } catch (err) {
+      console.error('Analysis failed:', err)
+      toast.error('Analysis Failed', 'Could not reach the AI service. Please try again.')
+      setState('input')
+    }
   }
 
   const handleSave = () => {

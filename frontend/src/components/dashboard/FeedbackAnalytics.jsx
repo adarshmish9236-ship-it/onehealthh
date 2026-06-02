@@ -135,6 +135,8 @@ function SentimentCard({ result }) {
   )
 }
 
+import { aiService } from '../../services/aiService'
+
 export default function FeedbackAnalytics() {
   const [feedback, setFeedback] = useState('')
   const [feedbackType, setFeedbackType] = useState('consultation')
@@ -143,10 +145,15 @@ export default function FeedbackAnalytics() {
 
   const handleAnalyze = async () => {
     if (!feedback.trim()) return
-    setLoading(true)
-    await new Promise(r => setTimeout(r, 2500))
-    setResult(MOCK_SENTIMENT_RESULT)
-    setLoading(false)
+    try {
+      setLoading(true)
+      const analysis = await aiService.analyzeFeedback(feedback)
+      setResult(analysis)
+    } catch (err) {
+      console.error('Analysis failed:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

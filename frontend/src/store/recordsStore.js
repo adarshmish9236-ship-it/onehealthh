@@ -1,107 +1,92 @@
 import { create } from 'zustand'
-
-const MOCK_RECORDS = [
-  {
-    id: 'rec-001', type: 'report', date: '2026-05-28',
-    title: 'Complete Blood Count (CBC)',
-    metadata: { doctor_name: 'Dr. Meera Pillai', hospital: 'Apollo Diagnostics', notes: 'Routine annual checkup' },
-    ai_analysis: {
-      summary: 'Most values are within normal range. Haemoglobin is slightly low at 11.2 g/dL — borderline anaemia. Platelet count is normal.',
-      extracted_values: [
-        { parameter: 'Haemoglobin', value: '11.2', unit: 'g/dL', reference_range: '12.0–16.0', status: 'low' },
-        { parameter: 'WBC Count', value: '6,800', unit: 'cells/μL', reference_range: '4,500–11,000', status: 'normal' },
-        { parameter: 'Platelets', value: '2,45,000', unit: '/μL', reference_range: '1,50,000–4,00,000', status: 'normal' },
-        { parameter: 'Fasting Glucose', value: '98', unit: 'mg/dL', reference_range: '70–100', status: 'normal' },
-      ],
-      suggested_actions: ['Increase iron-rich foods (spinach, lentils)', 'Retest in 3 months', 'Consider iron supplement'],
-    },
-  },
-  {
-    id: 'rec-002', type: 'prescription', date: '2026-05-15',
-    title: 'Asthma Medication Refill',
-    metadata: { doctor_name: 'Dr. Arjun Nair', hospital: 'City Clinic', notes: '' },
-    ai_analysis: null,
-  },
-  {
-    id: 'rec-003', type: 'diagnosis', date: '2026-04-10',
-    title: 'Viral Pharyngitis',
-    metadata: { doctor_name: 'Dr. Kavya Verma', hospital: 'Max Hospital', notes: 'Prescribed rest and paracetamol for 3 days.' },
-    ai_analysis: null,
-  },
-  {
-    id: 'rec-004', type: 'vaccination', date: '2026-01-20',
-    title: 'COVID-19 Booster Dose',
-    metadata: { doctor_name: 'Apollo Pharmacy Clinic', hospital: 'Apollo Clinic', notes: 'Covishield Booster' },
-    ai_analysis: null,
-  },
-  {
-    id: 'rec-005', type: 'report', date: '2025-11-05',
-    title: 'Lipid Profile Test',
-    metadata: { doctor_name: 'Dr. Meera Pillai', hospital: 'SRL Diagnostics', notes: '' },
-    ai_analysis: {
-      summary: 'Cholesterol levels are within acceptable range. LDL is on the higher end — dietary modification recommended.',
-      extracted_values: [
-        { parameter: 'Total Cholesterol', value: '198', unit: 'mg/dL', reference_range: '<200', status: 'normal' },
-        { parameter: 'LDL Cholesterol', value: '128', unit: 'mg/dL', reference_range: '<130', status: 'normal' },
-        { parameter: 'HDL Cholesterol', value: '52', unit: 'mg/dL', reference_range: '>40', status: 'normal' },
-        { parameter: 'Triglycerides', value: '145', unit: 'mg/dL', reference_range: '<150', status: 'normal' },
-      ],
-      suggested_actions: ['Reduce saturated fats', 'Increase omega-3 intake', 'Recheck in 6 months'],
-    },
-  },
-  {
-    id: 'rec-006', type: 'symptom_check', date: '2025-10-22',
-    title: 'Symptom Analysis: Headache + Fatigue',
-    metadata: { doctor_name: 'oneHealth AI', hospital: '', notes: '' },
-    ai_analysis: { summary: 'Medium risk. Possible tension headache or mild dehydration. Recommended rest and hydration.', suggested_actions: [] },
-  },
-]
-
-const MOCK_TRENDS = {
-  weight: [
-    { date: '2025-01', value: 61 }, { date: '2025-04', value: 60 },
-    { date: '2025-07', value: 59 }, { date: '2025-10', value: 58 },
-    { date: '2026-01', value: 57.5 }, { date: '2026-04', value: 58 },
-  ],
-  bloodPressure: [
-    { date: '2025-01', systolic: 128, diastolic: 84 },
-    { date: '2025-04', systolic: 125, diastolic: 82 },
-    { date: '2025-07', systolic: 122, diastolic: 80 },
-    { date: '2025-10', systolic: 124, diastolic: 81 },
-    { date: '2026-01', systolic: 120, diastolic: 79 },
-    { date: '2026-04', systolic: 118, diastolic: 78 },
-  ],
-  bloodSugar: [
-    { date: '2025-01', fasting: 102 }, { date: '2025-04', fasting: 100 },
-    { date: '2025-07', fasting: 98 }, { date: '2025-10', fasting: 99 },
-    { date: '2026-01', fasting: 97 }, { date: '2026-04', fasting: 98 },
-  ],
-  cholesterol: [
-    { date: '2025-11', total: 198, ldl: 128, hdl: 52 },
-    { date: '2026-04', total: 194, ldl: 122, hdl: 55 },
-  ],
-}
+import { collection, query, where, getDocs, doc, setDoc, deleteDoc, orderBy } from 'firebase/firestore'
+import { db } from '../services/firebase'
 
 export const useRecordsStore = create((set, get) => ({
-  records: MOCK_RECORDS,
-  trends: MOCK_TRENDS,
+  records: [],
+  trends: {},
   activeFilter: 'all',
   searchQuery: '',
   isLoading: false,
+  error: null,
 
   setFilter: (filter) => set({ activeFilter: filter }),
   setSearch: (q) => set({ searchQuery: q }),
   setLoading: (v) => set({ isLoading: v }),
 
+  // Fetch records from Firestore
+  fetchRecords: async (uid) => {
+    if (!uid) return
+    set({ isLoading: true, error: null })
+    try {
+      const q = query(
+        collection(db, 'records'),
+        where('userId', '==', uid),
+        orderBy('date', 'desc')
+      )
+      const snap = await getDocs(q)
+      const records = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      set({ records, isLoading: false })
+
+      // Build trend data from records with extracted values
+      const trends = {}
+      records.forEach(r => {
+        if (!r.ai_analysis?.extracted_values) return
+        r.ai_analysis.extracted_values.forEach(v => {
+          const param = v.parameter?.toLowerCase()
+          const date = r.date?.substring(0, 7) // YYYY-MM
+
+          if (param?.includes('haemoglobin') || param?.includes('hemoglobin')) {
+            if (!trends.haemoglobin) trends.haemoglobin = []
+            trends.haemoglobin.push({ date, value: parseFloat(v.value) || 0 })
+          }
+          if (param?.includes('weight')) {
+            if (!trends.weight) trends.weight = []
+            trends.weight.push({ date, value: parseFloat(v.value) || 0 })
+          }
+          if (param?.includes('fasting') || param?.includes('glucose')) {
+            if (!trends.bloodSugar) trends.bloodSugar = []
+            trends.bloodSugar.push({ date, fasting: parseFloat(v.value) || 0 })
+          }
+          if (param?.includes('total cholesterol')) {
+            if (!trends.cholesterol) trends.cholesterol = []
+            trends.cholesterol.push({ date, total: parseFloat(v.value) || 0 })
+          }
+        })
+      })
+      set({ trends })
+    } catch (err) {
+      console.error('[recordsStore] fetchRecords error:', err)
+      set({ error: err.message, isLoading: false })
+    }
+  },
+
   addRecord: (record) => set((s) => ({ records: [record, ...s.records] })),
-  removeRecord: (id) => set((s) => ({ records: s.records.filter(r => r.id !== id) })),
+  removeRecord: async (id) => {
+    try {
+      await deleteDoc(doc(db, 'records', id))
+      set((s) => ({ records: s.records.filter(r => r.id !== id) }))
+    } catch (err) {
+      console.error('[recordsStore] removeRecord error:', err)
+    }
+  },
+
+  saveRecord: async (uid, recordData) => {
+    const id = recordData.id || `rec-${Date.now()}`
+    const payload = { ...recordData, userId: uid, updatedAt: new Date().toISOString() }
+    await setDoc(doc(db, 'records', id), payload, { merge: true })
+    get().addRecord({ id, ...payload })
+    return id
+  },
 
   getFilteredRecords: () => {
     const { records, activeFilter, searchQuery } = get()
     return records.filter(r => {
       if (activeFilter !== 'all' && r.type !== activeFilter) return false
-      if (searchQuery && !r.title.toLowerCase().includes(searchQuery.toLowerCase())) return false
+      if (searchQuery && !r.title?.toLowerCase().includes(searchQuery.toLowerCase())) return false
       return true
     })
   },
+
+  clearRecords: () => set({ records: [], trends: {} }),
 }))

@@ -66,4 +66,7 @@ export const formatFileSize = (bytes) => {
   return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`
 }
 
-export const cn = (...classes) => classes.filter(Boolean).join(' ')
+import { twMerge } from 'tailwind-merge'
+import { clsx } from 'clsx'
+
+export const cn = (...classes) => twMerge(clsx(classes))

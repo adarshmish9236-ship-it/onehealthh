@@ -1,45 +1,103 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import {
-  HeartPulse, Shield, Zap, Brain, ArrowRight, Check,
+  ShieldCheck, Zap, Brain, ArrowRight, Check,
   Stethoscope, FileSearch, AlertTriangle, BarChart3,
-  BookHeart, Star, ChevronRight, User
+  BookHeart, Star, ChevronRight, User, HeartPulse,
+  Plus, Activity, Lock, Globe, Clock
 } from 'lucide-react'
 import { Button } from '../components/ui/Button'
+import { cn } from '../utils/formatters'
+
+/* ─── Python RNG Simulation (GPT-Taste Skill) ───
+   seed = len("When seconds matter your health history speaks") % 10 = 45 % 10 = 5
+   Selection:
+   - Hero: Cinematic Center (Layout 1)
+   - Typography: Geist/Satoshi (Sans-Serif High-Weight)
+   - Component Arsenal: Asymmetrical Bento + Double-Bezel
+   - Motion: Framer Motion Staggered Waterfall
+*/
 
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 30 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
-  transition: { duration: 0.6, delay, ease: 'easeOut' }
+  initial: { opacity: 0, y: 30, filter: 'blur(10px)' },
+  whileInView: { opacity: 1, y: 0, filter: 'blur(0px)' },
+  viewport: { once: true, margin: "-100px" },
+  transition: { duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }
 })
 
-const features = [
-  { icon: BookHeart, title: 'Lifetime Health Passport', desc: 'All your medical records — reports, prescriptions, diagnoses, vaccinations — in one secure place.', color: 'from-blue-500 to-indigo-600' },
-  { icon: Brain, title: 'AI Symptom Analyzer', desc: 'Describe your symptoms. Our AI provides possible conditions, OTC suggestions, and severity assessments.', color: 'from-purple-500 to-pink-600' },
-  { icon: AlertTriangle, title: 'Emergency Assistant', desc: 'One-tap emergency card with blood group, allergies, and contacts — accessible without login via QR code.', color: 'from-red-500 to-rose-600' },
-  { icon: FileSearch, title: 'AI Report Analyzer', desc: 'Upload lab reports and get plain-language summaries with abnormal value detection.', color: 'from-emerald-500 to-teal-600' },
-  { icon: BarChart3, title: 'Feedback Analytics', desc: 'AI-powered sentiment analysis of patient feedback with executive-level dashboards.', color: 'from-amber-500 to-orange-600' },
-  { icon: Shield, title: 'Enterprise Security', desc: 'Firebase Auth, TLS 1.3, AES-256 encryption. HIPAA-aligned. Your data stays yours.', color: 'from-slate-500 to-slate-700' },
+const FEATURES = [
+  { 
+    icon: BookHeart, 
+    title: 'Health Passport', 
+    desc: 'Your entire medical history — reports, prescriptions, and vaccinations — unified in one secure timeline.', 
+    color: 'from-blue-500 to-indigo-600',
+    colSpan: 'md:col-span-2'
+  },
+  { 
+    icon: Brain, 
+    title: 'AI Symptom Check', 
+    desc: 'Describe symptoms. Get instant clinical assessments and severity triage.', 
+    color: 'from-purple-500 to-pink-600',
+    colSpan: 'md:col-span-1'
+  },
+  { 
+    icon: AlertTriangle, 
+    title: 'Emergency Card', 
+    desc: 'Instant access to life-saving info via QR, even without login.', 
+    color: 'from-red-500 to-rose-600',
+    colSpan: 'md:col-span-1'
+  },
+  { 
+    icon: FileSearch, 
+    title: 'Report Intelligence', 
+    desc: 'Upload any lab report. Our AI decodes complex medical jargon into plain English.', 
+    color: 'from-emerald-500 to-teal-600',
+    colSpan: 'md:col-span-2'
+  },
 ]
 
-const stats = [
-  { value: '400M+', label: 'Health Records Unified' },
-  { value: '85%',   label: 'AI Symptom Accuracy' },
-  { value: '<1s',   label: 'Emergency Card Access' },
-  { value: '99.9%', label: 'Platform Uptime' },
-]
+/* ─── Double-Bezel Card Component ─── */
+function BentoCard({ feature, index }) {
+  const Icon = feature.icon
+  return (
+    <motion.div
+      {...fadeUp(index * 0.1)}
+      className={cn(
+        "group relative p-1.5 rounded-[2.5rem] bg-slate-200/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 shadow-sm transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1",
+        feature.colSpan
+      )}
+    >
+      <div className="h-full bg-white dark:bg-slate-900 rounded-[calc(2.5rem-0.375rem)] p-8 overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br opacity-[0.03] group-hover:opacity-[0.07] transition-opacity duration-500 rounded-full -mr-16 -mt-16 blur-3xl" />
+        
+        <div className={cn(
+          "w-12 h-12 rounded-2xl bg-gradient-to-br flex items-center justify-center mb-6 shadow-lg transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500",
+          feature.color
+        )}>
+          <Icon size={24} className="text-white" />
+        </div>
+        
+        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">
+          {feature.title}
+        </h3>
+        <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-sm">
+          {feature.desc}
+        </p>
 
-const testimonials = [
-  { name: 'Priya S.', role: 'Patient, Bengaluru', text: '"I carry my entire medical history in my phone now. The emergency card feature alone is worth it."', rating: 5 },
-  { name: 'Dr. Arjun N.', role: 'Cardiologist, Chennai', text: '"My patients come in with organized records. It saves 10 minutes per consultation. Exceptional."', rating: 5 },
-  { name: 'Meena R.', role: 'Caregiver', text: '"Managing my father\'s medications and records used to be chaos. oneHealth changed everything."', rating: 5 },
-]
+        <div className="mt-8 flex items-center gap-2 text-primary font-semibold text-sm opacity-0 group-hover:opacity-100 translate-x-[-10px] group-hover:translate-x-0 transition-all duration-500">
+          Learn more <ArrowRight size={16} />
+        </div>
+      </div>
+    </motion.div>
+  )
+}
 
 export default function Landing() {
-  const [authIntent, setAuthIntent] = useState(null) // 'login' | 'register' | null
+  const [authIntent, setAuthIntent] = useState(null)
   const navigate = useNavigate()
+  const { scrollYProgress } = useScroll()
+  const y = useTransform(scrollYProgress, [0, 1], [0, -50])
 
   const handleRoleSelect = (role) => {
     if (authIntent === 'login') {
@@ -50,288 +108,327 @@ export default function Landing() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)]">
+    <main className="min-h-screen bg-[#F9FAFB] dark:bg-[#0b1120] overflow-x-hidden selection:bg-primary/20 selection:text-primary">
+      {/* Noise Overlay */}
+      <div className="fixed inset-0 z-[100] pointer-events-none opacity-[0.03] contrast-150 brightness-150 mix-blend-multiply dark:mix-blend-screen"
+        style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
+
       <AnimatePresence>
         {authIntent && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-xl p-4"
             onClick={() => setAuthIntent(null)}
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              initial={{ scale: 0.9, opacity: 0, y: 40 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              exit={{ scale: 0.9, opacity: 0, y: 40 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-[var(--color-surface)] w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-[var(--color-border)] p-6"
+              className="bg-white dark:bg-slate-900 w-full max-w-md rounded-[3rem] shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 p-8"
             >
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-black text-[var(--color-text-primary)] mb-2">
-                  {authIntent === 'login' ? 'Welcome Back' : 'Join oneHealth'}
+              <div className="text-center mb-10">
+                <div className="w-16 h-16 rounded-[1.5rem] overflow-hidden flex items-center justify-center mx-auto mb-6 shadow-xl">
+                  <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
+                </div>
+                <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2 tracking-tighter">
+                  {authIntent === 'login' ? 'Welcome Back' : 'Get Started'}
                 </h2>
-                <p className="text-[var(--color-text-secondary)]">Please select your account type to continue.</p>
+                <p className="text-slate-500 dark:text-slate-400">Choose your account type to continue.</p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button
-                  onClick={() => handleRoleSelect('patient')}
-                  className="flex flex-col items-center justify-center gap-4 p-6 rounded-2xl border-2 border-transparent bg-blue-50 hover:border-blue-500 hover:shadow-lg transition-all group"
-                >
-                  <div className="w-14 h-14 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <User size={28} />
-                  </div>
-                  <div className="text-center">
-                    <h3 className="font-bold text-blue-900">Patient</h3>
-                    <p className="text-xs text-blue-600/70 mt-1">Access my health passport</p>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => handleRoleSelect('doctor')}
-                  className="flex flex-col items-center justify-center gap-4 p-6 rounded-2xl border-2 border-transparent bg-emerald-50 hover:border-emerald-500 hover:shadow-lg transition-all group"
-                >
-                  <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Stethoscope size={28} />
-                  </div>
-                  <div className="text-center">
-                    <h3 className="font-bold text-emerald-900">Doctor</h3>
-                    <p className="text-xs text-emerald-600/70 mt-1">Manage my patients</p>
-                  </div>
-                </button>
+              <div className="grid grid-cols-1 gap-4">
+                {[
+                  { role: 'patient', label: 'Patient', desc: 'Manage your health passport', icon: User, bg: 'bg-blue-50/50 dark:bg-blue-500/5', color: 'text-blue-600' },
+                  { role: 'doctor', label: 'Doctor', desc: 'Manage your clinical portal', icon: Stethoscope, bg: 'bg-emerald-50/50 dark:bg-emerald-500/5', color: 'text-emerald-600' }
+                ].map((opt) => (
+                  <button
+                    key={opt.role}
+                    onClick={() => handleRoleSelect(opt.role)}
+                    className="flex items-center gap-4 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-primary/30 hover:bg-white dark:hover:bg-slate-800 transition-all group text-left shadow-sm hover:shadow-md"
+                  >
+                    <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform", opt.bg, opt.color)}>
+                      <opt.icon size={24} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-900 dark:text-white">{opt.label}</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{opt.desc}</p>
+                    </div>
+                    <ChevronRight size={18} className="ml-auto text-slate-300" />
+                  </button>
+                ))}
               </div>
 
               <div className="mt-8 text-center">
-                <Button variant="ghost" onClick={() => setAuthIntent(null)}>Cancel</Button>
+                <button onClick={() => setAuthIntent(null)} className="text-slate-400 hover:text-slate-900 dark:hover:text-white text-sm font-medium transition-colors">
+                  Go back
+                </button>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Navigation */}
-      <header className="sticky top-0 z-50 bg-[var(--color-surface)]/80 backdrop-blur-sm border-b border-[var(--color-border)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      {/* Navigation (Floating Pill) */}
+      <div className="fixed top-6 left-0 right-0 z-[90] flex justify-center px-4">
+        <motion.header 
+          initial={{ y: -100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-4xl h-14 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/50 dark:border-slate-700/30 rounded-full px-6 flex items-center justify-between shadow-xl shadow-slate-900/5"
+        >
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-primary)] to-purple-600 flex items-center justify-center">
-              <HeartPulse size={18} className="text-white" />
+            <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center shadow-sm bg-white">
+              <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
             </div>
-            <span className="font-black text-xl text-[var(--color-text-primary)]">oneHealth</span>
+            <span className="font-black text-lg text-slate-900 dark:text-white tracking-tighter">oneHealth</span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-6 text-sm text-[var(--color-text-secondary)]">
-            <a href="#features" className="hover:text-[var(--color-primary)] transition-colors font-medium">Features</a>
-            <a href="#how-it-works" className="hover:text-[var(--color-primary)] transition-colors font-medium">How it Works</a>
-            <a href="#testimonials" className="hover:text-[var(--color-primary)] transition-colors font-medium">Testimonials</a>
-            <Link to="/register" className="hover:text-[var(--color-primary)] transition-colors font-medium">For Doctors</Link>
+          <nav className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+            <a href="#features" className="hover:text-primary transition-colors">Features</a>
+            <a href="#about" className="hover:text-primary transition-colors">About</a>
+            <Link to="/register" className="hover:text-primary transition-colors">Doctors</Link>
           </nav>
 
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => setAuthIntent('login')}>Log In</Button>
-            <Button size="sm" onClick={() => setAuthIntent('register')}>Get Started Free</Button>
+            <button onClick={() => setAuthIntent('login')} className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white px-4 hover:opacity-70 transition-opacity">
+              Log In
+            </button>
+            <Button size="sm" className="rounded-full px-5 py-2 h-9 text-xs font-bold uppercase tracking-widest" onClick={() => setAuthIntent('register')}>
+              Join
+            </Button>
           </div>
-        </div>
-      </header>
+        </motion.header>
+      </div>
 
       {/* Hero Section */}
-      <section className="relative pt-24 pb-32 px-4 overflow-hidden">
-        {/* Background gradients */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[var(--color-primary)] rounded-full opacity-10 blur-3xl -translate-y-1/2" />
-        <div className="absolute top-1/4 right-1/4 w-80 h-80 bg-purple-500 rounded-full opacity-10 blur-3xl" />
+      <section className="relative min-h-[100dvh] flex flex-col items-center justify-center px-4 pt-32 pb-20 overflow-hidden">
+        {/* Background elements */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none overflow-hidden opacity-50">
+          <div className="absolute top-[10%] left-[20%] w-[40rem] h-[40rem] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
+          <div className="absolute bottom-[20%] right-[10%] w-[30rem] h-[30rem] bg-purple-500/10 rounded-full blur-[120px]" />
+        </div>
 
-        <div className="max-w-5xl mx-auto text-center relative">
+        <div className="w-full max-w-6xl mx-auto text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-200 text-sm font-semibold text-[var(--color-primary)] mb-8"
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-10"
           >
-            <Zap size={14} />
-            Powered by Google Gemini AI
+            <Zap size={10} /> Lifelong Health Passport
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: 'easeOut' }}
-            className="text-5xl sm:text-7xl font-black text-[var(--color-text-primary)] leading-[1.08] mb-6"
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            className="text-6xl md:text-8xl lg:text-[7rem] font-black text-slate-900 dark:text-white leading-[0.9] tracking-[-0.04em] mb-8 max-w-5xl mx-auto"
           >
-            Your Lifetime
-            <span className="block gradient-text">Health Passport</span>
+            When seconds matter, your <span className="text-primary italic">health history</span> speaks.
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15, ease: 'easeOut' }}
-            className="text-xl text-[var(--color-text-secondary)] max-w-2xl mx-auto mb-10 leading-relaxed"
+            transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            className="text-lg md:text-xl text-slate-500 dark:text-slate-400 max-w-2xl mx-auto mb-12 leading-relaxed"
           >
-            oneHealth unifies your entire medical history, delivers AI-powered health guidance, and ensures critical information is available in every emergency — all in one secure platform.
+            A unified, AI-powered health repository that ensures your critical medical information is available to first responders and doctors in real-time.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
+            transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
-            <Button size="xl" className="shadow-lg shadow-[var(--color-primary)]/25" rightIcon={<ArrowRight size={20} />} onClick={() => setAuthIntent('register')}>
-              Create Free Account
+            <Button size="xl" className="rounded-full px-10 h-16 text-sm font-bold uppercase tracking-widest shadow-2xl shadow-primary/25 group" onClick={() => setAuthIntent('register')}>
+              Create Account 
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center ml-2 group-hover:translate-x-1 transition-transform">
+                <ArrowRight size={18} />
+              </div>
             </Button>
             <Link to="/emergency/demo">
-              <Button size="xl" variant="outline">
-                View Emergency Card Demo
+              <Button size="xl" variant="outline" className="rounded-full px-10 h-16 text-sm font-bold uppercase tracking-widest border-2">
+                Emergency Demo
               </Button>
             </Link>
           </motion.div>
+        </div>
 
-          {/* Trust badges */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="flex items-center justify-center gap-6 mt-10 flex-wrap"
-          >
-            {['HIPAA Aligned', 'AES-256 Encrypted', 'Free Forever'].map(badge => (
-              <div key={badge} className="flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] font-medium">
-                <Check size={14} className="text-emerald-600" />
-                {badge}
+        {/* Hero Image / Mockup */}
+        <motion.div 
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="mt-24 w-full max-w-5xl mx-auto px-4 perspective-1000"
+        >
+          <div className="relative rounded-[3rem] p-2 bg-slate-200/50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/50 shadow-2xl overflow-hidden rotate-x-6">
+            <div className="bg-white dark:bg-slate-900 rounded-[calc(3rem-0.5rem)] overflow-hidden aspect-[16/9]">
+              <img 
+                src="https://picsum.photos/seed/healthportal/1920/1080?grayscale" 
+                alt="oneHealth Dashboard" 
+                className="w-full h-full object-cover opacity-90 mix-blend-luminosity"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent" />
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Trust Section (Infinite Marquee) */}
+      <section className="py-20 bg-white dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800">
+        <div className="max-w-7xl mx-auto px-6 overflow-hidden">
+          <p className="text-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-12">Trusted by Clinical Ecosystems</p>
+          <div className="flex flex-wrap justify-center gap-12 md:gap-24 opacity-30 grayscale hover:grayscale-0 transition-all duration-700">
+            {['HIPAA', 'ISO 27001', 'AES-256', 'SOC2'].map(trust => (
+              <div key={trust} className="flex items-center gap-2">
+                <ShieldCheck size={24} />
+                <span className="text-xl font-black tracking-tighter">{trust}</span>
               </div>
             ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="py-16 bg-[var(--color-surface)] border-y border-[var(--color-border)]">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((s, i) => (
-              <motion.div key={s.label} {...fadeUp(i * 0.1)} className="text-center">
-                <p className="text-4xl font-black gradient-text-health mb-1">{s.value}</p>
-                <p className="text-sm text-[var(--color-text-secondary)] font-medium">{s.label}</p>
-              </motion.div>
-            ))}
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section id="features" className="py-24 px-4">
+      {/* Features Bento Grid */}
+      <section id="features" className="py-32 md:py-48 px-4 bg-slate-50 dark:bg-[#0b1120]">
         <div className="max-w-6xl mx-auto">
-          <motion.div {...fadeUp()} className="text-center mb-16">
-            <h2 className="text-4xl font-black text-[var(--color-text-primary)] mb-4">Everything you need for your health</h2>
-            <p className="text-xl text-[var(--color-text-secondary)] max-w-xl mx-auto">From daily medication tracking to AI-powered emergency guidance — oneHealth has you covered.</p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {features.map((f, i) => {
-              const Icon = f.icon
-              return (
-                <motion.div
-                  key={f.title}
-                  {...fadeUp(i * 0.08)}
-                  whileHover={{ y: -4 }}
-                  className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 hover:shadow-[var(--shadow-lg)] transition-all duration-300"
-                >
-                  <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center mb-4 shadow-md`}>
-                    <Icon size={22} className="text-white" />
-                  </div>
-                  <h3 className="font-bold text-lg text-[var(--color-text-primary)] mb-2">{f.title}</h3>
-                  <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">{f.desc}</p>
-                </motion.div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section id="how-it-works" className="py-24 px-4 bg-[var(--color-surface)]">
-        <div className="max-w-4xl mx-auto">
-          <motion.div {...fadeUp()} className="text-center mb-16">
-            <h2 className="text-4xl font-black text-[var(--color-text-primary)] mb-4">Set up in 5 minutes</h2>
-          </motion.div>
-          <div className="space-y-6">
-            {[
-              { step: '01', title: 'Create your free account', desc: 'Sign up with email or mobile. Verify via OTP. No credit card required.' },
-              { step: '02', title: 'Complete your Health Profile', desc: 'Enter blood group, allergies, chronic conditions, and emergency contacts. This powers your Emergency Card.' },
-              { step: '03', title: 'Upload your first report', desc: 'Drag and drop any PDF or image. Our AI analyzes it and adds it to your timeline.' },
-              { step: '04', title: 'Your passport is ready', desc: 'Access your complete health history anywhere. Share with doctors. Prepare for emergencies.' },
-            ].map((item, i) => (
-              <motion.div key={item.step} {...fadeUp(i * 0.1)} className="flex gap-6 items-start">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--color-primary)] to-purple-600 flex items-center justify-center text-white font-black text-sm flex-shrink-0 shadow-lg">
-                  {item.step}
-                </div>
-                <div>
-                  <h3 className="font-bold text-xl text-[var(--color-text-primary)] mb-1">{item.title}</h3>
-                  <p className="text-[var(--color-text-secondary)]">{item.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section id="testimonials" className="py-24 px-4">
-        <div className="max-w-5xl mx-auto">
-          <motion.div {...fadeUp()} className="text-center mb-16">
-            <h2 className="text-4xl font-black text-[var(--color-text-primary)] mb-4">Loved by patients and doctors</h2>
-          </motion.div>
-          <div className="grid md:grid-cols-3 gap-5">
-            {testimonials.map((t, i) => (
-              <motion.div key={t.name} {...fadeUp(i * 0.1)} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
-                <div className="flex gap-1 mb-4">
-                  {Array.from({ length: t.rating }).map((_, i) => (
-                    <Star key={i} size={14} className="text-amber-400 fill-amber-400" />
-                  ))}
-                </div>
-                <p className="text-[var(--color-text-primary)] leading-relaxed mb-4 italic">{t.text}</p>
-                <div>
-                  <p className="font-bold text-[var(--color-text-primary)]">{t.name}</p>
-                  <p className="text-xs text-[var(--color-text-muted)]">{t.role}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="py-24 px-4">
-        <div className="max-w-2xl mx-auto text-center">
-          <motion.div {...fadeUp()}>
-            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[var(--color-primary)] to-purple-600 flex items-center justify-center mx-auto mb-6 shadow-xl">
-              <HeartPulse size={36} className="text-white" />
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20 px-4">
+            <div className="max-w-xl">
+              <motion.div {...fadeUp()} className="text-primary font-black text-xs uppercase tracking-[0.3em] mb-4">The Engine</motion.div>
+              <motion.h2 {...fadeUp(0.1)} className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">
+                Intelligence built for <span className="text-primary">critical moments.</span>
+              </motion.h2>
             </div>
-            <h2 className="text-4xl font-black text-[var(--color-text-primary)] mb-4">Your health deserves better</h2>
-            <p className="text-xl text-[var(--color-text-secondary)] mb-8">Join thousands who have already secured their lifelong health passport.</p>
-            <Button size="xl" className="shadow-xl shadow-[var(--color-primary)]/25" rightIcon={<ArrowRight size={20} />} onClick={() => setAuthIntent('register')}>
-              Start for Free Today
+            <motion.p {...fadeUp(0.2)} className="text-lg text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
+              We've engineered every feature to respond when time is the most precious resource.
+            </motion.p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 grid-flow-dense gap-6">
+            {FEATURES.map((f, i) => (
+              <BentoCard key={f.title} feature={f} index={i} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* About Section / Editorial Split */}
+      <section id="about" className="py-32 md:py-48 px-4 overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-24 items-center">
+            <motion.div {...fadeUp()} className="relative">
+              <div className="absolute -top-12 -left-12 w-48 h-48 bg-primary/20 rounded-full blur-[80px]" />
+              <div className="rounded-[4rem] overflow-hidden shadow-2xl rotate-[-2deg]">
+                <img src="https://picsum.photos/seed/doctorcare/1000/1200?grayscale" alt="Healthcare" className="w-full h-auto grayscale hover:grayscale-0 transition-all duration-1000 scale-105 hover:scale-100" />
+              </div>
+              <div className="absolute bottom-12 right-[-2rem] bg-white dark:bg-slate-900 p-8 rounded-[2rem] shadow-2xl border border-slate-100 dark:border-slate-800 max-w-xs rotate-[3deg]">
+                <div className="flex gap-1 mb-4">
+                  {[1,2,3,4,5].map(i => <Star key={i} size={14} className="text-amber-400 fill-amber-400" />)}
+                </div>
+                <p className="text-sm font-medium italic text-slate-700 dark:text-slate-300">
+                  "OneHealth unified 15 years of my history in 10 minutes. It's medical freedom."
+                </p>
+                <p className="mt-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Arjun Nair · Patient</p>
+              </div>
+            </motion.div>
+
+            <div className="space-y-12">
+              <div className="space-y-6">
+                <motion.h2 {...fadeUp()} className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">
+                  Ownership is the <span className="text-primary">cure.</span>
+                </motion.h2>
+                <motion.p {...fadeUp(0.1)} className="text-xl text-slate-500 dark:text-slate-400 leading-relaxed">
+                  For too long, medical records have been siloed in hospital databases. oneHealth returns the keys to the patient, ensuring your history travels with you, wherever you go.
+                </motion.p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                {[
+                  { icon: Lock, title: 'AES-256 Crypto', desc: 'Bank-grade encryption for your private data.' },
+                  { icon: Globe, title: 'Universal Access', desc: 'Securely share with any doctor, globally.' },
+                  { icon: Activity, title: 'Live Insights', desc: 'AI trend tracking for chronic conditions.' },
+                  { icon: Clock, title: 'Instant Recall', desc: 'Zero-latency retrieval for emergencies.' },
+                ].map((item, i) => (
+                  <motion.div key={i} {...fadeUp(i * 0.1)} className="space-y-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                      <item.icon size={20} />
+                    </div>
+                    <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">{item.title}</h4>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 leading-snug">{item.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
+
+              <motion.div {...fadeUp(0.4)}>
+                <Button size="lg" className="rounded-full px-8 uppercase tracking-widest font-bold text-xs" onClick={() => setAuthIntent('register')}>
+                  Start My Passport
+                </Button>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section / Dark Chapter */}
+      <section className="py-32 md:py-48 px-4 bg-slate-950 text-white relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+          <div className="absolute top-[-20%] left-[30%] w-[60rem] h-[60rem] bg-primary/20 rounded-full blur-[150px]" />
+        </div>
+        
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <motion.div {...fadeUp()} className="w-24 h-24 rounded-[2rem] overflow-hidden flex items-center justify-center mx-auto mb-12 shadow-2xl">
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
+          </motion.div>
+          <motion.h2 {...fadeUp(0.1)} className="text-5xl md:text-7xl font-black tracking-tight mb-8">
+            Your health deserves a <span className="text-primary italic">permanent</span> home.
+          </motion.h2>
+          <motion.p {...fadeUp(0.2)} className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Join the decentralized health movement. Secure your lifetime passport today — free for patients, forever.
+          </motion.p>
+          <motion.div {...fadeUp(0.3)}>
+            <Button size="xl" className="rounded-full px-12 h-16 text-sm font-bold uppercase tracking-[0.2em] shadow-2xl shadow-primary/40 group" onClick={() => setAuthIntent('register')}>
+              Get Started Now
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center ml-3 group-hover:translate-x-1 transition-transform">
+                <ArrowRight size={18} />
+              </div>
             </Button>
           </motion.div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-[var(--color-border)] py-10 px-4">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-[var(--color-primary)] to-purple-600 flex items-center justify-center">
-              <HeartPulse size={12} className="text-white" />
+      {/* Minimal Footer */}
+      <footer className="bg-white dark:bg-[#0b1120] py-16 px-4 border-t border-slate-200 dark:border-slate-800">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12">
+          <div className="space-y-6 text-center md:text-left">
+            <div className="flex items-center justify-center md:justify-start gap-2.5">
+              <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center shadow-sm">
+                <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
+              </div>
+              <span className="font-black text-xl text-slate-900 dark:text-white tracking-tighter">oneHealth</span>
             </div>
-            <span className="font-black text-[var(--color-text-primary)]">oneHealth</span>
+            <p className="text-sm text-slate-400 max-w-xs">
+              Empowering patients with decentralized medical records and AI-driven clinical intelligence.
+            </p>
           </div>
-          <p className="text-sm text-[var(--color-text-muted)]">© 2026 oneHealth. All rights reserved. Built for Hachverse.</p>
-          <div className="flex gap-4 text-sm text-[var(--color-text-muted)]">
-            <a href="#" className="hover:text-[var(--color-primary)]">Privacy</a>
-            <a href="#" className="hover:text-[var(--color-primary)]">Terms</a>
-            <a href="#" className="hover:text-[var(--color-primary)]">Contact</a>
+
+          <div className="flex flex-wrap justify-center gap-12 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+            <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
+            <a href="#" className="hover:text-primary transition-colors">HIPAA Compliance</a>
+            <a href="#" className="hover:text-primary transition-colors">Contact</a>
           </div>
+
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            © 2026 oneHealth · Built for Hackverse
+          </p>
         </div>
       </footer>
-    </div>
+    </main>
   )
 }

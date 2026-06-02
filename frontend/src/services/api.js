@@ -1,31 +1,41 @@
 import axios from 'axios'
 import { auth } from './firebase'
 
-// Create an Axios instance
+// Unified API client — all traffic routes through /api/v1
 const api = axios.create({
-  // Point to the Flask backend URL defined in env variables, defaulting to localhost:5000
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:10000/api/v1',
   headers: {
-    'Content-Type': 'application/json'
-  }
+    'Content-Type': 'application/json',
+  },
+  timeout: 30000,
 })
 
-// Request Interceptor: Attach Firebase ID Token
-api.interceptors.request.use(async (config) => {
-  const user = auth.currentUser
-  if (user) {
-    const token = await user.getIdToken()
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-}, (error) => Promise.reject(error))
+// Request Interceptor: Attach raw Firebase JWT ID Token as Bearer header
+api.interceptors.request.use(
+  async (config) => {
+    const user = auth.currentUser
+    if (user) {
+      const token = await user.getIdToken(/* forceRefresh= */ false)
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => Promise.reject(error)
+)
 
-// Response Interceptor: Handle Global Errors (e.g., 401 Unauthorized)
+// Response Interceptor: surface structured backend errors; redirect on 401
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // You can handle global error states here (e.g., logging out user on 401)
-    console.error('API Error:', error.response?.data?.message || error.message)
+    const status = error.response?.status
+    const message = error.response?.data?.error?.message || error.message
+
+    if (status === 401) {
+      auth.signOut().catch(() => {})
+      window.location.href = '/login'
+    }
+
+    console.error(`[API] ${status ?? 'Network'} — ${message}`)
     return Promise.reject(error)
   }
 )

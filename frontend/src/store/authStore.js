@@ -26,6 +26,6 @@ export const useAuthStore = create(
 
       setLoading: (isLoading) => set({ isLoading }),
     }),
-    { name: 'onehealth-auth', partialize: (s) => ({ user: s.user, role: s.role, isAuthenticated: s.isAuthenticated }) }
+    { name: 'onehealth-auth', partialize: (s) => ({ user: s.user, role: s.role, token: s.token, isAuthenticated: s.isAuthenticated }) }
   )
 )

@@ -1,0 +1,120 @@
+# =============================================================================
+# OneHealth Backend — Python .gitignore
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Python bytecode & compilation cache
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+*.so
+
+# ---------------------------------------------------------------------------
+# Distribution / packaging
+# ---------------------------------------------------------------------------
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ---------------------------------------------------------------------------
+# Virtual environments & dependency trees
+# ---------------------------------------------------------------------------
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# ---------------------------------------------------------------------------
+# Operational runtime secrets & credentials
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+firebase_credentials.json
+service-account*.json
+*-firebase-adminsdk-*.json
+google-credentials.json
+
+# ---------------------------------------------------------------------------
+# Local database files
+# ---------------------------------------------------------------------------
+*.sqlite3
+*.db
+local_instance.db
+instance/
+
+# ---------------------------------------------------------------------------
+# Test suite & coverage artifacts
+# ---------------------------------------------------------------------------
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+junit*.xml
+
+# ---------------------------------------------------------------------------
+# Jupyter / IPython
+# ---------------------------------------------------------------------------
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+
+# ---------------------------------------------------------------------------
+# MyPy / type checkers
+# ---------------------------------------------------------------------------
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytype/
+.pyre/
+
+# ---------------------------------------------------------------------------
+# IDE artefacts (belt-and-suspenders from root gitignore)
+# ---------------------------------------------------------------------------
+.idea/
+.vscode/
+*.suo
+*.sw?
+
+# ---------------------------------------------------------------------------
+# Miscellaneous
+# ---------------------------------------------------------------------------
+*.log
+*.bak
+*.tmp
+celerybeat-schedule
+celerybeat.pid

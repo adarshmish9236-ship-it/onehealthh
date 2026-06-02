@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button'
 import { Input, Select } from '../components/ui/Input'
 import { ProgressBar } from '../components/ui/index'
 import { useAuthStore } from '../store/authStore'
+import { useUserStore } from '../store/userStore'
 import {
   BLOOD_GROUPS, GENDERS, COMMON_ALLERGIES, COMMON_CONDITIONS, COMMON_VACCINES
 } from '../utils/constants'
@@ -161,7 +162,9 @@ export default function Onboarding() {
   const [currentStep, setCurrentStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-  const setUser = useAuthStore(s => s.setUser)
+  const user = useAuthStore(s => s.user)
+  const saveProfile = useUserStore(s => s.saveProfile)
+  const setProfile = useUserStore(s => s.setProfile)
 
   const [basicInfo, setBasicInfo] = useState({ dob: '', gender: '', blood_group: '', height_cm: '', weight_kg: '' })
   const [medInfo, setMedInfo] = useState({ allergies: [], chronic_diseases: [], medical_notes: '' })
@@ -173,9 +176,37 @@ export default function Onboarding() {
 
   const handleComplete = async () => {
     setLoading(true)
-    await new Promise(r => setTimeout(r, 1200))
-    setUser({ uid: 'mock-uid', email: 'priya@example.com', name: 'Priya Sharma' }, 'mock-token', 'patient')
-    navigate('/dashboard')
+    try {
+      const uid = user?.uid
+      if (!uid) throw new Error('Not authenticated')
+
+      const profileData = {
+        profile: {
+          dob: basicInfo.dob,
+          gender: basicInfo.gender,
+          blood_group: basicInfo.blood_group,
+          height_cm: basicInfo.height_cm ? Number(basicInfo.height_cm) : null,
+          weight_kg: basicInfo.weight_kg ? Number(basicInfo.weight_kg) : null,
+          allergies: medInfo.allergies,
+          chronic_diseases: medInfo.chronic_diseases,
+          medical_notes: medInfo.medical_notes,
+          emergency_contacts: contacts.filter(c => c.name),
+          vaccinations: vaccines,
+        },
+        onboarding_complete: true,
+        updatedAt: new Date().toISOString(),
+      }
+
+      await saveProfile(uid, profileData)
+      setProfile(profileData.profile)
+      navigate('/dashboard')
+    } catch (err) {
+      console.error('[Onboarding] save error:', err)
+      // Navigate anyway — user can update later
+      navigate('/dashboard')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const step = STEPS[currentStep - 1]
