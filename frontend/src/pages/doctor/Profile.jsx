@@ -28,10 +28,11 @@ export function Profile() {
         <div className="px-8 pb-8">
           <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-end -mt-16 relative z-10">
             <div className="relative group">
-              <img 
-                src={user?.avatar || "https://ui-avatars.com/api/?name=Sarah+Smith&background=fff&color=0D8ABC"} 
-                alt="Profile" 
-                className="w-32 h-32 rounded-full border-4 border-white dark:border-slate-900 shadow-lg"
+              <Avatar 
+                src={user?.avatar || ""} 
+                name={user?.name || "Sarah Smith"}
+                size="xxl"
+                className="border-4 border-white dark:border-slate-900 shadow-lg"
               />
               <button className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
                 <Edit2 className="w-4 h-4" />

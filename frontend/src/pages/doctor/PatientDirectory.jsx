@@ -29,6 +29,7 @@ export function PatientDirectory() {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [activeFilter, setActiveFilter] = useState('All')
+  const [passportId, setPassportId] = useState('')
 
   // Filter logic
   const filteredPatients = PATIENTS.filter(p => {
@@ -40,15 +41,48 @@ export function PatientDirectory() {
     return p.tags.includes(activeFilter)
   })
 
+  const handlePassportSearch = (e) => {
+    e.preventDefault()
+    if (passportId.trim()) {
+      navigate(`/doctor/patients/${passportId.trim()}`)
+    }
+  }
+
   return (
     <div className="space-y-6">
       
+      {/* Passport Lookup */}
+      <Card className="p-6 border-0 shadow-sm bg-blue-50 dark:bg-blue-900/20 rounded-2xl border-blue-100 dark:border-blue-800">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex-1">
+            <h2 className="text-xl font-bold text-blue-900 dark:text-blue-100 mb-1">Direct Patient Lookup</h2>
+            <p className="text-blue-700 dark:text-blue-300 text-sm">Enter a Health Passport ID to securely view a patient's medical records.</p>
+          </div>
+          
+          <form onSubmit={handlePassportSearch} className="flex-1 max-w-lg relative flex gap-3">
+            <div className="relative flex-1">
+              <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="e.g., HP-12345" 
+                value={passportId}
+                onChange={(e) => setPassportId(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all dark:text-white uppercase"
+              />
+            </div>
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6">
+              Lookup
+            </Button>
+          </form>
+        </div>
+      </Card>
+
       {/* Header & Search */}
       <Card className="p-6 border-0 shadow-sm bg-white dark:bg-slate-900 rounded-2xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex-1">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Patient Directory</h2>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">Search and manage your patient records securely.</p>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">My Patients</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Search your existing patients.</p>
           </div>
           
           <div className="flex-1 max-w-lg relative">

@@ -11,7 +11,8 @@ class AppConfig:
     FIREBASE_PROJECT_ID = os.getenv('FIREBASE_PROJECT_ID')
     FIREBASE_STORAGE_BUCKET = os.getenv('FIREBASE_STORAGE_BUCKET')
     GROQ_API_KEY = os.getenv('GROQ_API_KEY')
-    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+    _raw_gemini_key = os.getenv('GEMINI_API_KEY')
+    GEMINI_API_KEY = _raw_gemini_key.strip().strip("'\"") if _raw_gemini_key else None
     SENTRY_DSN = os.getenv('SENTRY_DSN')
     ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '*').split(',')
     MAX_UPLOAD_SIZE_MB = int(os.getenv('MAX_UPLOAD_SIZE_MB', 20))
@@ -22,12 +23,20 @@ class AppConfig:
             'SECRET_KEY',
             'FIREBASE_CREDENTIALS_JSON',
             'FIREBASE_PROJECT_ID',
-            'FIREBASE_STORAGE_BUCKET',
-            'GEMINI_API_KEY'
+            'FIREBASE_STORAGE_BUCKET'
         ]
         missing = [var for var in required_vars if not getattr(cls, var)]
         if missing:
             raise ValueError(f"Missing required environment variables: {', '.join(missing)}")
+            
+        if not cls.GEMINI_API_KEY:
+            if cls.FLASK_ENV == 'production':
+                import sentry_sdk
+                try:
+                    sentry_sdk.capture_message("CRITICAL: GEMINI_API_KEY is missing from environment variables.", level="fatal")
+                except Exception:
+                    pass
+            print("WARNING: GEMINI_API_KEY is missing. AI features will fail.")
         
         # Ensure FIREBASE_CREDENTIALS_JSON is valid JSON
         try:

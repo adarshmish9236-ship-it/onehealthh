@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '../../../store/authStore'
 import { useUIStore } from '../../../store/uiStore'
+import { Avatar } from '../../ui'
 
 const NAV_LINKS = [
   { name: 'Dashboard', path: '/doctor/dashboard', icon: LayoutDashboard },
@@ -112,10 +113,11 @@ export function DoctorLayout() {
             {/* User Profile / Logout */}
             <div className="p-4 border-t border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-3 px-2 mb-4">
-                <img 
-                  src={user?.avatar || "https://ui-avatars.com/api/?name=Dr+Smith&background=0D8ABC&color=fff"} 
-                  alt="Doctor Avatar" 
-                  className="w-10 h-10 rounded-xl border-2 border-white dark:border-slate-800 shadow-sm"
+                <Avatar 
+                  src={user?.avatar || ""} 
+                  name={user?.name || "Sarah Smith"}
+                  size="md"
+                  className="rounded-xl border-2 border-white dark:border-slate-800 shadow-sm"
                 />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">Dr. {user?.name || "Sarah Smith"}</p>

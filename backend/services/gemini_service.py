@@ -68,9 +68,22 @@ def _call_ai(system_instruction: str, prompt: str, max_tokens: int):
             generation_config=get_generation_config(max_tokens),
             safety_settings=SAFETY_SETTINGS
         )
-        response = model.generate_content(prompt, request_options={"timeout": 60.0})
+        response = model.generate_content(prompt, request_options={"timeout": 30.0})
         return json.loads(response.text)
     except Exception as e:
+        error_msg = str(e).lower()
+        error_type = type(e).__name__
+        
+        # Immediate routing for timeouts and network disconnects
+        if "timeout" in error_msg or "disconnect" in error_msg or "deadline" in error_msg or "504" in error_msg:
+            from utils.exceptions import AITimeoutError
+            raise AITimeoutError({"original_error": str(e)})
+            
+        # Catch specific SDK anomalies
+        if error_type in ["BlockedPromptException", "InvalidArgument", "APIError", "GoogleAPICallError"]:
+            from utils.exceptions import APIError
+            raise APIError("AI_GENERATION_ERROR", f"Gemini API error ({error_type}): {str(e)}", 400)
+            
         # Fallback to Groq
         print(f"Gemini failed, falling back to Groq. Reason: {e}")
         return _call_groq_fallback(system_instruction, prompt, max_tokens)

@@ -68,7 +68,21 @@ const TIMELINE_DATA = [
   }
 ]
 
-export function MedicalTimeline() {
+export function MedicalTimeline({ timeline }) {
+  const data = timeline?.length > 0 
+    ? timeline.map((item, index) => ({
+        id: item.data?.id || index,
+        date: item.date ? new Date(item.date).toLocaleDateString() : 'Unknown Date',
+        type: item.type === 'record' ? item.data?.type : item.type,
+        title: item.data?.title || item.data?.name || 'Untitled',
+        doctor: item.data?.metadata?.doctor_name || 'System',
+        desc: item.data?.metadata?.notes || 'No description available',
+        icon: item.type === 'record' ? FileText : Pill,
+        color: item.type === 'record' ? 'bg-blue-500 text-white' : 'bg-emerald-500 text-white',
+        ring: item.type === 'record' ? 'ring-blue-100 dark:ring-blue-900/30' : 'ring-emerald-100 dark:ring-emerald-900/30'
+      }))
+    : TIMELINE_DATA;
+
   return (
     <div className="relative pl-4 sm:pl-0">
       
@@ -76,7 +90,7 @@ export function MedicalTimeline() {
       <div className="absolute left-4 sm:left-32 top-2 bottom-2 w-0.5 bg-slate-200 dark:bg-slate-800"></div>
 
       <div className="space-y-8">
-        {TIMELINE_DATA.map((item, index) => (
+        {data.map((item, index) => (
           <motion.div 
             key={item.id}
             initial={{ opacity: 0, x: -20 }}

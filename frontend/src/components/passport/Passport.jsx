@@ -5,7 +5,8 @@ import {
   Search, Plus, Filter, ChevronRight, FileText, Pill,
   Stethoscope, Syringe, Activity, Eye, Trash2,
   UploadCloud, Calendar, User, Building2, X, StickyNote,
-  TrendingUp, TrendingDown, Minus, Download, Sparkles, Info, AlertCircle
+  TrendingUp, TrendingDown, Minus, Download, Sparkles, Info, AlertCircle,
+  Copy, Check
 } from 'lucide-react'
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as ReTooltip, 
@@ -13,6 +14,7 @@ import {
 } from 'recharts'
 import { useRecordsStore } from '../../store/recordsStore'
 import { useUserStore } from '../../store/userStore'
+import { useAuthStore } from '../../store/authStore'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import { Modal } from '../ui/Modal'
@@ -117,7 +119,8 @@ function UploadModal({ isOpen, onClose }) {
   const [step, setStep] = useState('idle') // idle | uploading | done
   const [files, setFiles] = useState([])
   const [form, setForm] = useState({ type: 'report', date: '', doctor: '', hospital: '', notes: '' })
-  const addRecord = useRecordsStore(s => s.addRecord)
+  const saveRecord = useRecordsStore(s => s.saveRecord)
+  const user = useAuthStore(s => s.user)
   const toast = useToast()
 
   const onDrop = useCallback((accepted) => {
@@ -134,20 +137,33 @@ function UploadModal({ isOpen, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setStep('uploading')
-    await new Promise(r => setTimeout(r, 1500))
 
-    const newRecord = {
-      id: `rec-${Date.now()}`,
-      type: form.type,
-      date: form.date || new Date().toISOString().split('T')[0],
-      title: files[0]?.name || `${getRecordTypeLabel(form.type)} Record`,
-      metadata: { doctor_name: form.doctor, hospital: form.hospital, notes: form.notes },
-      ai_analysis: null,
+    try {
+      const newRecord = {
+        id: `rec-${Date.now()}`,
+        type: form.type,
+        date: form.date || new Date().toISOString().split('T')[0],
+        title: files[0]?.name || `${getRecordTypeLabel(form.type)} Record`,
+        metadata: { doctor_name: form.doctor, hospital: form.hospital, notes: form.notes },
+        ai_analysis: null,
+      }
+      
+      // Save directly to Firestore using store action
+      await saveRecord(user?.uid, newRecord)
+      
+      setStep('done')
+      toast.success('Record Added', 'Your health record has been added to your passport.')
+      setTimeout(() => { 
+        setStep('idle'); 
+        setFiles([]); 
+        setForm({ type: 'report', date: '', doctor: '', hospital: '', notes: '' }); 
+        onClose() 
+      }, 1000)
+    } catch(err) {
+      console.error(err)
+      setStep('idle')
+      toast.error('Upload Failed', err.message || 'Something went wrong')
     }
-    addRecord(newRecord)
-    setStep('done')
-    toast.success('Record Added', 'Your health record has been added to your passport.')
-    setTimeout(() => { setStep('idle'); setFiles([]); setForm({ type: 'report', date: '', doctor: '', hospital: '', notes: '' }); onClose() }, 1000)
   }
 
   const uploading = step === 'uploading'
@@ -472,11 +488,26 @@ function TimelineCard({ record, onClick, index }) {
   )
 }
 
-// Overview Card
-function PassportOverview({ profile, healthMetrics }) {
+function PassportOverview({ profile, healthMetrics, records }) {
   const p = profile?.profile
   const name = profile?.name || 'User'
+  const passportId = profile?.passport_id || 'Generating...'
   const cfg = getHealthScoreConfig(healthMetrics?.health_score || 0)
+
+  const [copied, setCopied] = useState(false)
+  const handleCopy = () => {
+    if (passportId !== 'Generating...') {
+      navigator.clipboard.writeText(passportId)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
+  // Compute live counts from local records state
+  const liveReports = records?.filter(r => r.type === 'report').length || 0
+  const livePrescriptions = records?.filter(r => r.type === 'prescription').length || 0
+  const liveConsultations = records?.filter(r => ['diagnosis', 'treatment', 'followup'].includes(r.type)).length || 0
+  const liveVaccinations = records?.filter(r => r.type === 'vaccination').length || 0
 
   return (
     <div className="rounded-2xl overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-md)]">
@@ -488,6 +519,18 @@ function PassportOverview({ profile, healthMetrics }) {
             <div className="flex flex-wrap items-center gap-2 mt-1">
               {p?.dob && <span className="text-sm opacity-90">{new Date().getFullYear() - new Date(p.dob).getFullYear()} yrs</span>}
               {p?.gender && <span className="text-sm opacity-90">· {p.gender}</span>}
+            </div>
+            
+            <div className="mt-3 inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-white/30">
+              <span className="text-xs font-semibold text-white/90 uppercase tracking-wider">Passport ID:</span>
+              <span className="text-sm font-mono font-bold text-white tracking-wider">{passportId}</span>
+              <button 
+                onClick={handleCopy}
+                className="ml-2 p-1 hover:bg-white/20 rounded-md transition-colors"
+                title="Copy ID"
+              >
+                {copied ? <Check size={14} className="text-green-300" /> : <Copy size={14} className="text-white/80" />}
+              </button>
             </div>
           </div>
           {p?.blood_group && (
@@ -503,10 +546,10 @@ function PassportOverview({ profile, healthMetrics }) {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-[var(--color-border)] bg-[var(--color-surface)] -mt-1">
         {[
-          { label: 'Reports',       value: healthMetrics?.reports_count || 0 },
-          { label: 'Prescriptions', value: healthMetrics?.prescriptions_count || 0 },
-          { label: 'Consultations', value: healthMetrics?.consultations_count || 0 },
-          { label: 'Vaccinations',  value: healthMetrics?.vaccinations_count || 0 },
+          { label: 'Reports',       value: liveReports },
+          { label: 'Prescriptions', value: livePrescriptions },
+          { label: 'Consultations', value: liveConsultations },
+          { label: 'Vaccinations',  value: liveVaccinations },
         ].map((s, i) => (
           <div key={s.label} className="p-4 text-center">
             <p className="text-2xl font-bold text-[var(--color-text-primary)] font-data">{s.value}</p>
@@ -554,7 +597,7 @@ export default function Passport() {
       </div>
 
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-        <PassportOverview profile={profile} healthMetrics={healthMetrics} />
+        <PassportOverview profile={profile} healthMetrics={healthMetrics} records={records} />
       </motion.div>
 
       <div className="flex flex-col sm:flex-row gap-3">

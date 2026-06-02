@@ -92,12 +92,13 @@ export function EmptyState({ icon, title, description, action, className }) {
 
 // Avatar
 export function Avatar({ src, name = '', size = 'md', className }) {
-  const sizeMap = { sm: 'w-8 h-8 text-xs', md: 'w-10 h-10 text-sm', lg: 'w-14 h-14 text-base', xl: 'w-20 h-20 text-2xl' }
-  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+  const [error, setError] = React.useState(false);
+  const sizeMap = { sm: 'w-8 h-8 text-xs', md: 'w-10 h-10 text-sm', lg: 'w-14 h-14 text-base', xl: 'w-20 h-20 text-2xl', xxl: 'w-32 h-32 text-4xl' }
+  const initials = name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U';
 
   return (
-    <div className={cn('rounded-2xl bg-gradient-to-br from-[var(--color-primary)] to-purple-600 flex items-center justify-center font-semibold text-white flex-shrink-0 overflow-hidden', sizeMap[size], className)}>
-      {src ? <img src={src} alt={name} className="w-full h-full object-cover" /> : <span>{initials}</span>}
+    <div className={cn('rounded-full bg-gradient-to-br from-[var(--color-primary)] to-purple-600 flex items-center justify-center font-semibold text-white flex-shrink-0 overflow-hidden', sizeMap[size], className)}>
+      {src && !error && !src.includes('ui-avatars.com') ? <img src={src} alt={name} className="w-full h-full object-cover" onError={() => setError(true)} /> : <span>{initials}</span>}
     </div>
   )
 }

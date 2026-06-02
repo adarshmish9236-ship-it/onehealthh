@@ -6,6 +6,7 @@ import UploadModal from '../components/passport/UploadModal'
 import { Button } from '../components/ui/Button'
 import { Plus, ActivitySquare, AlertCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useUserStore } from '../store/userStore'
 
 export default function Passport() {
   const [isUploadOpen, setIsUploadOpen] = useState(false)
@@ -39,7 +40,7 @@ export default function Passport() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <OverviewCard />
+        <OverviewCard profile={useUserStore(s => s.profile)} healthMetrics={useUserStore(s => s.healthMetrics)} />
       </motion.div>
 
       <motion.div

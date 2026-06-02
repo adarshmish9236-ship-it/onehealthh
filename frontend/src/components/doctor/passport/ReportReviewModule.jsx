@@ -38,16 +38,39 @@ const REPORTS = [
   }
 ]
 
-export function ReportReviewModule() {
-  const [selectedReportId, setSelectedReportId] = useState(REPORTS[0].id)
+export function ReportReviewModule({ timeline }) {
+  const data = timeline?.length > 0 
+    ? timeline
+        .filter(t => t.type === 'record' && t.data)
+        .map(t => ({
+          id: t.data.id,
+          title: t.data.title,
+          date: t.date ? new Date(t.date).toLocaleDateString() : 'Unknown Date',
+          lab: t.data.metadata?.hospital || 'Unknown Lab',
+          type: t.data.type,
+          aiSummary: t.data.ai_analysis ? {
+            status: t.data.ai_analysis.extracted_values?.some(v => v.status === 'high' || v.status === 'critical') ? 'Warning' : 'Normal',
+            text: t.data.ai_analysis.summary || 'No summary available.',
+            flags: t.data.ai_analysis.extracted_values?.filter(v => v.status !== 'normal').map(v => `${v.status} ${v.parameter}`) || []
+          } : {
+            status: 'Normal',
+            text: 'AI analysis pending or not available for this report.',
+            flags: []
+          }
+        }))
+    : REPORTS;
+
+  const [selectedReportId, setSelectedReportId] = useState(data.length > 0 ? data[0].id : null)
   
-  const activeReport = REPORTS.find(r => r.id === selectedReportId)
+  const activeReport = data.find(r => r.id === selectedReportId) || data[0]
 
   return (
     <div className="space-y-4">
       {/* Report List */}
       <div className="grid grid-cols-1 gap-3">
-        {REPORTS.map((report) => (
+        {data.length === 0 ? (
+          <div className="p-4 rounded-2xl border bg-slate-50 text-slate-500 text-center text-sm">No reports available</div>
+        ) : data.map((report) => (
           <div 
             key={report.id}
             onClick={() => setSelectedReportId(report.id)}
@@ -76,6 +99,7 @@ export function ReportReviewModule() {
 
       {/* Active Report Preview Area */}
       <AnimatePresence mode="wait">
+        {activeReport ? (
         <motion.div
           key={activeReport.id}
           initial={{ opacity: 0, y: 10 }}
@@ -115,7 +139,7 @@ export function ReportReviewModule() {
               <h6 className="font-bold text-indigo-900 dark:text-indigo-300 flex items-center gap-1 text-sm">
                 <Sparkles className="w-4 h-4" /> AI Analysis
               </h6>
-              {activeReport.aiSummary.status === 'Warning' ? (
+              {activeReport.aiSummary?.status === 'Warning' ? (
                 <span className="px-2 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 text-xs font-bold rounded flex items-center gap-1">
                   <AlertTriangle className="w-3 h-3" /> Flagged
                 </span>
@@ -127,11 +151,11 @@ export function ReportReviewModule() {
             </div>
 
             <p className="text-sm text-indigo-950/80 dark:text-indigo-200/80 leading-relaxed mb-3 relative z-10">
-              {activeReport.aiSummary.text}
+              {activeReport.aiSummary?.text}
             </p>
 
-            {activeReport.aiSummary.flags.length > 0 && (
-              <div className="flex gap-2 relative z-10">
+            {activeReport.aiSummary?.flags?.length > 0 && (
+              <div className="flex gap-2 relative z-10 flex-wrap">
                 {activeReport.aiSummary.flags.map(flag => (
                   <span key={flag} className="px-2 py-1 bg-white/60 dark:bg-slate-900/60 text-indigo-800 dark:text-indigo-300 text-[10px] font-bold rounded uppercase tracking-wider shadow-sm border border-indigo-100 dark:border-indigo-800/50">
                     {flag}
@@ -141,6 +165,7 @@ export function ReportReviewModule() {
             )}
           </div>
         </motion.div>
+        ) : null}
       </AnimatePresence>
       
       <Button variant="outline" className="w-full text-blue-600 border-blue-200 hover:bg-blue-50 dark:border-blue-900 dark:text-blue-400 dark:hover:bg-blue-900/20">

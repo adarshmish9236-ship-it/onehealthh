@@ -24,7 +24,7 @@ class ConsentRequiredError(APIError):
 
 class AITimeoutError(APIError):
     def __init__(self, details: dict = None):
-        super().__init__('AI_TIMEOUT', 'Gemini API did not respond within 30s', 504, details)
+        super().__init__('AI_TIMEOUT', 'Gemini API did not respond within 30s or credential validation failed', 504, details)
 
 class FileTooLargeError(APIError):
     def __init__(self, details: dict = None):
