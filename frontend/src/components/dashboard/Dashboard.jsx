@@ -272,7 +272,7 @@ export default function Dashboard() {
   const isRecordsLoading = useRecordsStore(s => s.isLoading)
   const user = useAuthStore(s => s.user)
 
-  const [trendType, setTrendType] = useState('weight')
+  const [trendType, setTrendType] = useState('haemoglobin')
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [medications, setMedications] = useState([])
   const [medsLoading, setMedsLoading] = useState(false)
@@ -326,12 +326,11 @@ export default function Dashboard() {
 
   const trendChartData = trends[trendType] || []
   const trendConfig = {
-    weight:      { key: 'value',   name: 'Weight',    color: '#6366f1', unit: ' kg' },
+    haemoglobin: { key: 'value',   name: 'Haemoglobin', color: '#ef4444', unit: ' g/dL' },
     bloodSugar:  { key: 'fasting', name: 'Glucose',   color: '#10b981', unit: '' },
     cholesterol: { key: 'total',   name: 'Cholesterol', color: '#f59e0b', unit: '' },
-    haemoglobin: { key: 'value',   name: 'Haemoglobin', color: '#ef4444', unit: ' g/dL' },
   }
-  const tc = trendConfig[trendType]
+  const tc = trendConfig[trendType] || trendConfig.haemoglobin
   const recentRecords = records.slice(0, 5)
 
   const containerVariants = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } }
@@ -435,7 +434,7 @@ export default function Dashboard() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                 <h2 className="text-base font-semibold text-[var(--color-text-primary)]">Health Trends</h2>
                 <div className="flex gap-1 p-1 bg-[var(--color-surface-2)] rounded-lg">
-                  {Object.keys(trendConfig).filter(k => (trends[k]?.length || 0) > 0 || k === 'weight').map(t => (
+                  {Object.keys(trendConfig).filter(k => (trends[k]?.length || 0) > 0 || k === 'haemoglobin').map(t => (
                     <button
                       key={t}
                       onClick={() => setTrendType(t)}

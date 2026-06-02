@@ -17,6 +17,7 @@ import { Card, Button, Badge } from '../../components/ui'
 import { MedicalTimeline } from '../../components/doctor/passport/MedicalTimeline'
 import { ReportReviewModule } from '../../components/doctor/passport/ReportReviewModule'
 import { HealthTrendsChart } from '../../components/doctor/passport/HealthTrendsChart'
+import { TodaysMedications } from '../../components/doctor/passport/TodaysMedications'
 import api from '../../services/api'
 
 export function PatientPassport() {
@@ -68,9 +69,10 @@ export function PatientPassport() {
     )
   }
 
-  const { profile, name, emergency_card, timeline } = patientData
+  const { profile, name, emergency_card, timeline, health_score } = patientData
   const age = profile?.dob ? new Date().getFullYear() - new Date(profile.dob).getFullYear() : '--'
   const initials = name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase()
+  const activeMedCount = timeline?.filter(t => t.type === 'medication').length || 0
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -109,6 +111,19 @@ export function PatientPassport() {
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700"></span>
                   <span className="flex items-center gap-1 font-bold text-red-500"><DropletIcon className="w-3 h-3" /> {profile?.blood_group || '--'}</span>
                 </div>
+                {/* Computed health score badge */}
+                {(health_score ?? profile?.health_score) != null && (
+                  <div className="mt-3 inline-flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-500/20">
+                      <Activity className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                      <span className="text-sm font-extrabold text-indigo-700 dark:text-indigo-300">
+                        {health_score ?? profile?.health_score}
+                      </span>
+                      <span className="text-xs text-indigo-500 dark:text-indigo-400">/100</span>
+                    </div>
+                    <span className="text-xs text-slate-400 dark:text-slate-500">Health Score</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -240,19 +255,18 @@ export function PatientPassport() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
-             <Card className="p-6 border-0 shadow-sm bg-white dark:bg-slate-900">
-               <h4 className="font-bold text-slate-900 dark:text-white mb-4">Quick Stats</h4>
-               <div className="space-y-4">
-                 <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                   <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Total Records</span>
-                   <span className="font-bold text-slate-900 dark:text-white">{timeline?.filter(t => t.type === 'record').length || 0}</span>
-                 </div>
-                 <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                   <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Last Update</span>
-                   <span className="font-bold text-slate-900 dark:text-white">{timeline?.[0]?.date ? new Date(timeline[0].date).toLocaleDateString() : 'N/A'}</span>
-                 </div>
-               </div>
-             </Card>
+            <Card className="p-6 border-0 shadow-sm bg-white dark:bg-slate-900">
+              <div className="flex items-center gap-2 mb-5">
+                <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl">
+                  <Pill className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 dark:text-white">Today's Medications</h4>
+                  <p className="text-xs text-slate-400 dark:text-slate-500">{activeMedCount} active prescription{activeMedCount !== 1 ? 's' : ''}</p>
+                </div>
+              </div>
+              <TodaysMedications timeline={timeline} />
+            </Card>
           </motion.div>
         </div>
 

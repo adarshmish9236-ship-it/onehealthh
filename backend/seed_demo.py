@@ -826,15 +826,18 @@ def seed_data():
     m1.set({
         "id": m1.id,
         "patient_uid": patient_uid,
-        "name": "Vitamin D3 1000 IU",
-        "dosage": "1 capsule",
+        "name": "Amlodipine 5mg",
+        "dosage": "1 tablet",
         "frequency": "once",
         "timing": ["08:00"],
-        "start_date": "2026-05-01",
-        "end_date": "2026-08-01",
-        "instructions": "Take with fatty meal for better absorption.",
+        "start_date": "2026-01-05",
+        "end_date": "2026-12-31",
+        "instructions": "Take every morning with water. Do not crush. For blood pressure.",
+        "condition": "Hypertension",
+        "category": "Antihypertensive",
+        "color": "#6366f1",
         "status": "active",
-        "prescribed_by": "Dr. Demo",
+        "prescribed_by": "Dr. Sarah Smith",
         "adherence_log": [],
         "created_at": firestore.SERVER_TIMESTAMP
     })
@@ -843,15 +846,98 @@ def seed_data():
     m2.set({
         "id": m2.id,
         "patient_uid": patient_uid,
-        "name": "Amlodipine 5mg",
+        "name": "Metformin 500mg",
+        "dosage": "1 tablet",
+        "frequency": "twice",
+        "timing": ["08:00", "21:00"],
+        "start_date": "2026-02-15",
+        "end_date": "2026-12-31",
+        "instructions": "Take with meals to reduce stomach upset. For prediabetes management.",
+        "condition": "Prediabetes",
+        "category": "Antidiabetic",
+        "color": "#10b981",
+        "status": "active",
+        "prescribed_by": "Dr. Sarah Smith",
+        "adherence_log": [],
+        "created_at": firestore.SERVER_TIMESTAMP
+    })
+
+    m3_pat1 = db.collection('medications').document()
+    m3_pat1.set({
+        "id": m3_pat1.id,
+        "patient_uid": patient_uid,
+        "name": "Ferrous Sulfate 325mg",
         "dosage": "1 tablet",
         "frequency": "once",
-        "timing": ["09:00"],
-        "start_date": "2026-03-01",
-        "end_date": "2026-09-01",
-        "instructions": "Take in the morning with water. Do not crush.",
+        "timing": ["13:00"],
+        "start_date": "2026-01-10",
+        "end_date": "2026-07-10",
+        "instructions": "Take on an empty stomach or with vitamin C for better absorption. Avoid antacids within 2 hours.",
+        "condition": "Iron Deficiency Anemia",
+        "category": "Iron Supplement",
+        "color": "#ef4444",
         "status": "active",
-        "prescribed_by": "Dr. Demo",
+        "prescribed_by": "Dr. Sarah Smith",
+        "adherence_log": [],
+        "created_at": firestore.SERVER_TIMESTAMP
+    })
+
+    m4_pat1 = db.collection('medications').document()
+    m4_pat1.set({
+        "id": m4_pat1.id,
+        "patient_uid": patient_uid,
+        "name": "Levothyroxine 25mcg",
+        "dosage": "1 tablet",
+        "frequency": "once",
+        "timing": ["07:00"],
+        "start_date": "2026-02-01",
+        "end_date": "2027-02-01",
+        "instructions": "Take 30 minutes BEFORE breakfast on an empty stomach. Do not take with calcium or antacids.",
+        "condition": "Subclinical Hypothyroidism",
+        "category": "Thyroid Hormone",
+        "color": "#f59e0b",
+        "status": "active",
+        "prescribed_by": "Dr. Emily Chen",
+        "adherence_log": [],
+        "created_at": firestore.SERVER_TIMESTAMP
+    })
+
+    m5_pat1 = db.collection('medications').document()
+    m5_pat1.set({
+        "id": m5_pat1.id,
+        "patient_uid": patient_uid,
+        "name": "Rosuvastatin 10mg",
+        "dosage": "1 tablet",
+        "frequency": "once",
+        "timing": ["21:00"],
+        "start_date": "2026-03-20",
+        "end_date": "2026-12-31",
+        "instructions": "Take at night. Avoid grapefruit juice. For high cholesterol.",
+        "condition": "Hypercholesterolemia",
+        "category": "Statin",
+        "color": "#8b5cf6",
+        "status": "active",
+        "prescribed_by": "Dr. Sarah Smith",
+        "adherence_log": [],
+        "created_at": firestore.SERVER_TIMESTAMP
+    })
+
+    m6_pat1 = db.collection('medications').document()
+    m6_pat1.set({
+        "id": m6_pat1.id,
+        "patient_uid": patient_uid,
+        "name": "Vitamin D3 1000 IU",
+        "dosage": "1 capsule",
+        "frequency": "once",
+        "timing": ["08:00"],
+        "start_date": "2026-05-01",
+        "end_date": "2026-08-01",
+        "instructions": "Take with fatty meal for better absorption.",
+        "condition": "Vitamin D Deficiency",
+        "category": "Supplement",
+        "color": "#f97316",
+        "status": "active",
+        "prescribed_by": "Dr. Sarah Smith",
         "adherence_log": [],
         "created_at": firestore.SERVER_TIMESTAMP
     })

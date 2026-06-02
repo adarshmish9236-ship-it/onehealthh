@@ -51,8 +51,11 @@ export const useUserStore = create(
             return acc
           }, { reports_count: 0, prescriptions_count: 0, consultations_count: 0, vaccinations_count: 0 })
 
-          // Simple health score: 50 base + up to 50 from record completeness
-          const score = Math.min(100, 50 + records.length * 3)
+          // Fetch computed score directly from backend or profile
+          const userDoc = await getDoc(doc(db, 'users', uid))
+          const userProfile = userDoc.exists() ? userDoc.data().profile : {}
+          const score = userProfile?.health_score || Math.min(100, 50 + records.length * 3)
+
           set({ healthMetrics: { ...counts, health_score: score } })
         } catch (err) {
           console.error('[userStore] fetchHealthMetrics error:', err)
