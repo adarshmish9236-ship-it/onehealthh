@@ -122,7 +122,7 @@ def register():
     except firebase_admin.auth.PhoneNumberAlreadyExistsError:
         raise ValidationError({'errors': [{'msg': 'An account with this phone number already exists', 'type': 'auth/phone-already-in-use'}]})
     except Exception as e:
-        raise InternalServerError({'reason': str(e)})
+        raise InternalServerError({'reason': 'An internal error occurred during registration'})
 
 @auth_bp.route('/login', methods=['POST'])
 @rate_limit(limit=10, window=60)
@@ -164,7 +164,7 @@ def login():
     except ResourceNotFoundError:
         raise ValidationError({'errors': [{'msg': 'User profile not found in database'}]})
     except Exception as e:
-        raise InternalServerError({'reason': str(e)})
+        raise InternalServerError({'reason': 'An internal error occurred during login'})
 
 @auth_bp.route('/verify-otp', methods=['POST'])
 @rate_limit(limit=10, window=60)
@@ -178,7 +178,7 @@ def verify_otp():
         custom_token = firebase_admin.auth.create_custom_token(data.uid)
         return format_success_response({'token': custom_token.decode('utf-8')})
     except Exception as e:
-        raise InternalServerError({'reason': str(e)})
+        raise InternalServerError({'reason': 'An internal error occurred during OTP verification'})
 
 @auth_bp.route('/set-role', methods=['POST'])
 @require_auth(roles=['admin'])
@@ -196,4 +196,4 @@ def set_role():
     except ResourceNotFoundError:
         raise
     except Exception as e:
-        raise InternalServerError({'reason': str(e)})
+        raise InternalServerError({'reason': 'An internal error occurred while updating role'})

@@ -85,7 +85,7 @@ function BentoCard({ feature, index }) {
           {feature.desc}
         </p>
 
-        <div className="mt-8 flex items-center gap-2 text-primary font-semibold text-sm opacity-0 group-hover:opacity-100 translate-x-[-10px] group-hover:translate-x-0 transition-all duration-500">
+        <div className="mt-8 flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-sm opacity-0 group-hover:opacity-100 translate-x-[-10px] group-hover:translate-x-0 transition-all duration-500">
           Learn more <ArrowRight size={16} />
         </div>
       </div>
@@ -264,7 +264,7 @@ export default function Landing() {
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
             className="text-6xl md:text-8xl lg:text-[7rem] font-black text-slate-900 dark:text-white leading-[0.9] tracking-[-0.04em] mb-8 max-w-5xl mx-auto"
           >
-            When seconds matter, your <span className="text-primary italic">health history</span> speaks.
+            When seconds matter, your <span className="text-blue-600 dark:text-blue-400 italic">health history</span> speaks.
           </motion.h1>
 
           <motion.p
@@ -317,9 +317,9 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20 px-4">
             <div className="max-w-xl">
-              <motion.div {...fadeUp()} className="text-primary font-black text-xs uppercase tracking-[0.3em] mb-4">The Engine</motion.div>
+              <motion.div {...fadeUp()} className="text-blue-600 dark:text-blue-400 font-black text-xs uppercase tracking-[0.3em] mb-4">The Engine</motion.div>
               <motion.h2 {...fadeUp(0.1)} className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">
-                Intelligence built for <span className="text-primary">critical moments.</span>
+                Intelligence built for <span className="text-blue-600 dark:text-blue-400">critical moments.</span>
               </motion.h2>
             </div>
             <motion.p {...fadeUp(0.2)} className="text-lg text-slate-700 dark:text-slate-300 max-w-xs leading-relaxed">
@@ -358,7 +358,7 @@ export default function Landing() {
             <div className="space-y-12">
               <div className="space-y-6">
                 <motion.h2 {...fadeUp()} className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">
-                  Ownership is the <span className="text-primary">cure.</span>
+                  Ownership is the <span className="text-blue-600 dark:text-blue-400">cure.</span>
                 </motion.h2>
                 <motion.p {...fadeUp(0.1)} className="text-xl text-slate-700 dark:text-slate-300 leading-relaxed">
                   For too long, medical records have been siloed in hospital databases. oneHealth returns the keys to the patient, ensuring your history travels with you, wherever you go.
@@ -402,8 +402,8 @@ export default function Landing() {
           <motion.div {...fadeUp()} className="w-24 h-24 rounded-[2rem] overflow-hidden flex items-center justify-center mx-auto mb-12 shadow-2xl">
             <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
           </motion.div>
-          <motion.h2 {...fadeUp(0.1)} className="text-5xl md:text-7xl font-black tracking-tight mb-8">
-            Your health deserves a <span className="text-primary italic">permanent</span> home.
+          <motion.h2 {...fadeUp(0.1)} className="text-5xl md:text-7xl font-black text-white tracking-tight mb-8">
+            Your health deserves a <span className="text-blue-400 italic">permanent</span> home.
           </motion.h2>
           <motion.p {...fadeUp(0.2)} className="text-xl text-slate-300 mb-12 max-w-2xl mx-auto leading-relaxed">
             Join the decentralized health movement. Secure your lifetime passport today — free for patients, forever.

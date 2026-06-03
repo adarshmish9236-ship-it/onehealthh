@@ -43,7 +43,7 @@ def require_auth(roles=None):
             except AuthForbiddenError:
                 raise
             except Exception as e:
-                raise AuthTokenInvalidError({'reason': str(e)})
+                raise AuthTokenInvalidError({'reason': 'An internal error occurred while validating the token'})
 
             return f(*args, **kwargs)
         return decorated_function
